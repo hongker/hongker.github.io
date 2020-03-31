@@ -150,3 +150,56 @@ func main() {
     // do something
 }
 ```
+
+## 双向锁DoubleLock
+在日常的项目中，时常会有类似转账的业务。当A向B转账的同时，B向A转账，如果仅仅简单的在账户的基础上加锁，A向B转账，加锁A，加锁B，此刻B向A转账，加锁B，再锁A，此刻会产生循环死锁。
+解决方案：解开循环锁的关键，就在于固定加锁的顺序。比如：不管A向B转账，或者是B向A转账，都先加锁A，再加锁B。
+```go
+// DoubleLock
+type DoubleLock struct {
+	FromLock RedisLock
+	ToLock   RedisLock
+}
+// Lock
+func (lock *DoubleLock) Lock(second int) error {
+	hashCodeFrom := HashCode(lock.FromLock.Key)
+    hashCodeTo := HashCode(lock.ToLock.Key)
+    // choose little one
+	if hashCodeFrom < hashCodeTo {
+		if err := lock.FromLock.Lock(second); err != nil {
+			return err
+		}
+
+		return lock.ToLock.Lock(second)
+	} else if hashCodeFrom > hashCodeTo {
+		if err := lock.ToLock.Lock(second); err != nil {
+			return err
+		}
+
+		return lock.FromLock.Lock(second)
+	}
+
+	return errors.New("key is same")
+}
+
+// Unlock
+func (lock *DoubleLock) Unlock() error {
+	if err := lock.FromLock.Unlock(); err != nil {
+		return err
+	}
+
+	return lock.ToLock.Unlock()
+}
+// HashCode 
+func HashCode(s string) int {
+	v := int(crc32.ChecksumIEEE([]byte(s)))
+	if v >= 0 {
+		return v
+	}
+	if -v >= 0 {
+		return -v
+	}
+	// v == MinInt
+	return 0
+}
+```
