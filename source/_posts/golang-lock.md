@@ -112,3 +112,41 @@ func main() {
     wg.Wait()
 }
 ```
+
+## 分布式Redis锁
+往往在服务端都是集群模式，在需要对数据进行安全的线性操作时，需要用到分布式锁。以下就是基于Redis实现的分布式锁。
+```go
+// RedisLock Redis锁
+type RedisLock struct {
+	Key string
+}
+
+// 加锁
+func (lock *RedisLock) Lock(second int) error {
+	if second == 0 {
+		second = 2
+	}
+
+	res, err := app.Redis().SetNX(lock.Key, 1, time.Duration(second)*time.Second).Result()
+	if err != nil || res == false {
+		return errors.New("failed to lock")
+	}
+
+	return nil
+}
+
+// 解锁
+func (lock *RedisLock) Unlock() error {
+	return app.Redis().Del(lock.Key).Err()
+}
+
+func main() {
+    lock := &RedisLock{Key:"uniqueLockKey"}
+    if err := lock.Lock(); err != nil {
+        fmt.Println(err)
+        return
+    }
+    defer lock.Unlock()
+    // do something
+}
+```
