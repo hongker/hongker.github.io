@@ -1,7 +1,7 @@
 ---
 title: 协程与管道
 date: 2020-03-30 16:38:50
-tags:
+tags: golang
 ---
 介绍一些常规的用法
 ## channel的状态
@@ -106,5 +106,101 @@ func main() {
 		}
 	}
 
+}
+```
+
+## 读取Excel
+通过channel实现异步读取excel的demo
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/tealeg/xlsx"
+)
+
+func main()  {
+	// data.xls:
+	// title
+	// 1
+	// 2
+	// 3
+	reader := NewExcelReader("static/data.xlsx", 10)
+	// read
+	go func() {
+		fmt.Println(reader.Read(0))
+	}()
+
+	// output
+	for out := range reader.OutPut() {
+		// other process
+		fmt.Println(out)
+	}
+
+}
+
+// ExcelReader reader of excel
+type ExcelReader struct {
+	// excel file name
+	FileName string
+
+	// data
+	items chan map[string]string
+}
+
+// NewExcelReader return ExcelReader with filename and chan length
+func NewExcelReader(filename string, chanLen int) *ExcelReader {
+	return &ExcelReader{
+		FileName: filename,
+		items:    make(chan map[string]string, chanLen),
+	}
+}
+
+// Read read excel sheet
+func (r *ExcelReader) Read(sheetNo int /* sheet number*/) error {
+	// open file
+	xlFile, err := xlsx.OpenFile(r.FileName)
+	if err != nil {
+		return err
+	}
+
+	sheets := xlFile.Sheets[sheetNo]
+
+	// set first row as map filed
+	var fieldArr []string
+
+	for idx, row := range sheets.Rows {
+		var arr []string
+		// read data
+		for _, cell := range row.Cells {
+			arr = append(arr, cell.String())
+		}
+
+		if arr == nil { // filter empty row
+			continue
+		}
+
+		// read filed
+		if idx == 0 {
+			fieldArr = arr
+			continue
+		}
+
+		item := make(map[string]string)
+		for key, field := range fieldArr {
+			item[field] = arr[key]
+		}
+
+		r.items <- item
+	}
+
+	// close channel when read finished
+	close(r.items)
+	return nil
+}
+
+// OutPut return read data
+func (r *ExcelReader) OutPut() <- chan map[string]string {
+	return r.items
 }
 ```
