@@ -63,10 +63,29 @@ tag_map: golang
 
 menu:
   主页: /
-  Golang: /tags/golang
-  
+  Golang: /tags/golang/
+  容器: /tags/docker
+  设计模式: /tags/设计模式
+avatar:  static/avatar.jpeg
+# SubNav
 subnav:
-  github: "#"
+  github: "github.com/hongker"
+  # weibo: "#"
+  # rss: "#"
+  # zhihu: "#"
+  qq: "774601526"
+  #weixin: "#"
+  #jianshu: "#"
+  #douban: "#"
+  #segmentfault: "#"
+  #bilibili: "#"
+  #acfun: "#"
+  mail: "mailto:xiaok2013@live.com"
+  #facebook: "#"
+  #google: "#"
+  #twitter: "#"
+  #linkedin: "#"
+
 # Date / Time format
 ## Hexo uses Moment.js to parse and display date
 ## You can customize the date format as defined in
