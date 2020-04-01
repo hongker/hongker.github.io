@@ -1,7 +1,7 @@
 ---
-title: Golang代码优化03-Http响应处理
+title: Golang代码优化04-Http响应处理
 date: 2020-03-31 12:28:14
-tags:
+tags: golang
 ---
 介绍读取http的response内容。
 

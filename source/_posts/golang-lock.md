@@ -1,5 +1,5 @@
 ---
-title: Golang代码优化04-锁
+title: Golang代码优化05-锁
 date: 2020-03-31 13:52:03
 tags: golang
 ---
