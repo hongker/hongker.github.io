@@ -26,7 +26,7 @@ func main() {
 	}
 }
 
-func send(ch chan string) {
+func sendData(ch chan string) {
     ch <- "Washington"
 	ch <- "Tripoli"
 	ch <- "London"

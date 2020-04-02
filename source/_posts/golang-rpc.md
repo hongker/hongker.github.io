@@ -196,3 +196,33 @@ go run client/main.go
 // 改变password: "123",输出：
 login failed: rpc error: code = Unauthenticated desc = password is incorrect
 ```
+
+- 备注说明
+一直纠结如`参数错误`，`数据不存在`等业务状态码应该使用error的code存储，还是在每个response里定义一个公共的code字段，在查阅相关资料：
+```
+https://www.bookstack.cn/read/API-design-guide/API-design-guide-07-%E9%94%99%E8%AF%AF.md
+```
+>开发人员不太可能编写大量处理逻辑错误的代码，所以单独的API应该避免定义额外的错误代码。 作为参考，每个API调用平均处理3个错误就意味着大多数应用程序只是处理错误了，这对开发者来说体验不够友好。
+
+如果选择在Response里定义code字段，调用方也许需要判断两次code。故我推荐使用GRPC里error定义好的code存储即可。
+
+### Thrift
+>thrift 最初是 facebook 开发使用的 rpc 通信框架，后来贡献给了 apache 基金会，出来得比较早，几乎支持所有的后端语言，使用非常广泛，是不可不知的一个网络框架
+
+- 下载go库
+```
+ go get git.apache.org/thrift.git/lib/go/thrift/...
+```
+
+- 编译安装
+前往`http://thrift.apache.org/download`下载源文件，我下载的版本是`https://mirror.bit.edu.cn/apache/thrift/0.13.0/thrift-0.13.0.tar.gz`
+```
+// 解压
+tar -zxvf thrift-0.13.0.tar.gz
+cd thrift-0.13.0/
+// 编译
+./configure  --prefix=/usr
+make -j8
+```
+
+怎么都编译失败。。这特么。。先暂停。。

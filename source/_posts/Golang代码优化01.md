@@ -16,8 +16,8 @@ type Error struct {
 
 // Error string
 func (e *Error) Error() string {
-	s, _ := json.Encode(e)
-	return s
+	b, _ := json.Marshal(e)
+	return string(b)
 }
 
 // New return error with code
