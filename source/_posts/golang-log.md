@@ -1,7 +1,7 @@
 ---
 title: Golang代码优化09-日志
 date: 2020-04-01 21:48:16
-tags:
+tags: golang
 ---
 本文介绍在golang中的日志使用方式。
 
