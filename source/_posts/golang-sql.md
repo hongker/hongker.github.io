@@ -1,5 +1,5 @@
 ---
-title: GOlang代码优化12-gorm
+title: Golang代码优化12-gorm
 date: 2020-04-07 13:00:00
 tags: golang
 ---
