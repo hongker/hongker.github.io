@@ -127,3 +127,11 @@ jsonContnt:
     excerpt: false
     categories: false
     tags: true
+
+
+toc:
+  maxdepth: 3
+  class: toc
+  slugify: transliteration
+  decodeEntities: false
+  anchor: false
