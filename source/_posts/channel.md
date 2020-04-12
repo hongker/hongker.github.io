@@ -204,3 +204,26 @@ func (r *ExcelReader) OutPut() <- chan map[string]string {
 	return r.items
 }
 ```
+
+## Goroutine
+Goroutines 是在 Golang 中执行并发任务的方式。Go线程实现模型MPG
+- Machine,表示内核线程。
+- Processor,处理器，执行G的上下文环境，每个P会维护一个本地的go routine队列。
+- Goroutine,并发的最小逻辑单元，轻量级的线程。
+
+一个线程使用一个处理器，一个处理器运行多个协程。
+
+- Runtime里与Goroutine相关函数
+```go
+Goexit:退出当前执行的goroutine
+Gosched:让出当前goroutine的执行权限，调度器安排其他等待的任务运行，并在下次某个时候从该位置回复执行。
+NumCPU:返回CPU核数量。
+NumGoroutine：返回正在执行和排队的任务总数。
+GOMAXPROCS：用来设置可以并行计算的CPU核数的最大值，并返回之前的值。
+```
+
+- 调度原理
+1.Processor的数量由GOMAXPROCS设置
+2.用户需要做的就是添加goroutine,即通过`go`开启协程。
+3.Goroutine的数量超过了Machine的处理能力，且有空余的Processor的话，runtime会自动创建Machine
+4.Machine拿到Processor后开始工作，取Goroutine的顺序：本地队列>全局队列>其他P的队列。如果没有Goroutine，Machine归还Processor后休眠。
