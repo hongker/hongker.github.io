@@ -6,7 +6,7 @@
 title: Hongker的博客
 subtitle: Golang,PHP工程师
 description: 做喜欢做的事,不断提高自身的水平。
-keywords: "go,php,docker"
+keywords: "go,php,docker,k8s,微服务,blockchain"
 author: hongker
 email: xiaok2013@live.com
 language:
@@ -64,8 +64,9 @@ tag_map: golang
 menu:
   主页: /
   Golang: /tags/golang/
-  容器: /tags/docker
+  服务化: /tags/micro-service
   设计模式: /tags/设计模式
+  区块链: /tags/blockchain
 avatar:  static/avatar.jpeg
 # SubNav
 subnav:

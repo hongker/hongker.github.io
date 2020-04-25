@@ -57,7 +57,7 @@ func main () {
 当需要处理较多的httpResponse时，可以选择先初始化一个Buffer池，提升效率。
 ```go
 // BufferPool use sync.pool to build a buffer pool
-type Adapter struct {
+type BufferPool struct {
 	pool sync.Pool
 }
 
