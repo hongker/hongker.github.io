@@ -66,7 +66,7 @@ menu:
   Golang: /tags/golang/
   服务化: /tags/micro-service
   设计模式: /tags/设计模式
-  区块链: /tags/blockchain
+  架构与算法: /tags/架构与算法
 avatar:  static/avatar.jpeg
 # SubNav
 subnav:

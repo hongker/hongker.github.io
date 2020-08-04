@@ -1,7 +1,7 @@
 ---
 title: 架构师之路-队列
 date: 2020-07-28 14:41:59
-tags: golang
+tags: 架构与算法
 ---
 本文介绍在golang里如何实现队列得数据结构
 
@@ -63,6 +63,9 @@ func (q queue) Push(items ...interface{}) {
 
 func (q queue) Pop() (interface{}) {
 	item := q.list.Front()
+	if item == nil {
+		return nil
+	}
 	q.list.Remove(item)
 	return item.Value
 }
