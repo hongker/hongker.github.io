@@ -1,7 +1,7 @@
 ---
 title: Golang代码优化08-RPC通信
 date: 2020-04-01 14:47:59
-tags:
+tags: golang
 ---
 本文介绍go里的rpc开发的知识点与相关使用场景。
 
