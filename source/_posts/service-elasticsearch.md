@@ -41,7 +41,7 @@ tags: micro-service
 - 如果number_of_primary_shards在查询的时候取余发生变化，则无法获取到该数据。即：在查询的时候，底层根据文档id%主分片数量获取分片位置
 
 
-![image](https://upload-images.jianshu.io/upload_images/7017386-85f5867459bca717?imageMogr2/auto-orient/strip|imageView2/2/w/807/format/webp)
+![image](https://upload-images.jianshu.io/upload_images/7017386-85f5867459bca717)
 ```
 1.客户端向 ES1节点（协调节点）发送写请求，通过路由计算公式得到值为0，则当前数据应被写到主分片 S0 上。
 2.ES1 节点将请求转发到 S0 主分片所在的节点 ES3，ES3 接受请求并写入到磁盘。
@@ -230,4 +230,22 @@ curl -XGET 'http://localhost:9200/_cat/nodes?pretty'
 
 # 查看索引
 curl -XGET 'localhost:9200/_cat/indices?v'
+```
+
+## 冷热分离
+通过设置`node.attr.temperature`为`hot`或者`warm`区分冷热节点。
+
+- 将索引迁移到冷节点：
+```
+curl -XPUT localhost:9200/index_name/_settings -H "Content-Type: application/json" -d '{"index.routing.allocation.require.temperature":"warm"}'
+```
+
+- 将索引恢复到热节点:
+```
+curl -XPUT localhost:9200/index_name/_settings -H "Content-Type: application/json" -d '{"index.routing.allocation.require.temperature":"hot"}'
+```
+
+- 查看索引的状态
+```
+curl -XGET "localhost:9200/_cat/shards/index_name?v&h=index,shard,prirep,node&s=node"
 ```

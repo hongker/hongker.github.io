@@ -38,7 +38,7 @@ external_link: true # Open external links in new tab
 excerpt_link: more
 filename_case: 0
 render_drafts: false
-post_asset_folder: false
+post_asset_folder: true
 relative_link: false
 future: true
 highlight:

@@ -14,7 +14,7 @@ tags: micro-service
 - 低成本扩容，弹性伸缩。
 
 ## 架构图
-![架构图](http://processon.com/chart_image/5e8dcda56376894bc680e558.png)
+![架构图](http://processon.com/chart_image/603a46327d9c087bdf6e7a5c.png?_=1616421945476)
 
 ## 模块说明
 <!--more-->
