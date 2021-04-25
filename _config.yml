@@ -67,7 +67,7 @@ menu:
   服务化: /tags/micro-service
   kubernetes: /tags/kubernetes
   设计模式: /tags/设计模式
-  架构与算法: /tags/架构与算法
+  数据结构与算法: /tags/algorithm
 avatar:  static/avatar.jpeg
 # SubNav
 subnav:

@@ -8,8 +8,14 @@ tags: micro-service
 ## Etcd
 >一个高可用的分布式键值(key-value)数据库。etcd内部采用raft协议作为一致性算法，etcd基于Go语言实现。
 
+## 一致性算法raft
+节点的三种角色：
+- Leader: 负责接收客户端的请求，将日志复制到其他节点。
+- Candidate: 用于选举Leader的一种角色。
+- Follower: 普通节点，负责响应Leader和Candidate节点的请求。
+
 ## 服务注册与发现
-![service](https://upload-images.jianshu.io/upload_images/5397496-d2afe8bb1544a0bf.jpg?imageMogr2/auto-orient/strip|imageView2/2/w/994/format/webp)
+![service](http://processon.com/chart_image/6084cf02637689195242cbff.png?_=1619390448374)
 
 
 ### 服务注册   
@@ -209,7 +215,7 @@ func main() {
 ```
 
 - 优化
-服务发现不需要每次都去查询etcd里的数据，可以通过定期查询的方式去获取数据。但是这样会导致如果某个节点已注销，这样会导致信息更新滞后，请求到已注销的节点上，出现异常。所以我们通过监听的方式来保持信息同步，这样可以做到实时性更新。
+服务发现不需要每次都去查询etcd里的数据，可以通过定期查询的方式去获取数据。但是如果某个节点已注销，这样会导致信息更新滞后，请求到已注销的节点上，出现异常。所以我们通过监听的方式来保持信息同步，这样可以做到实时性更新。
 
 ```go
 
@@ -275,7 +281,7 @@ func (watcher *Watcher) Watch() {
 
 func main() {
 	watcher := NewWatcher(service, "order")
-	// 开启协程监听
+	// 开启协程来负责监听
 	go watcher.Watch()
 	for { // 模拟每个一秒获取一次,来观察服务节点的注册与注销是否生效
 		time.Sleep(time.Second)
