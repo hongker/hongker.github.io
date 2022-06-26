@@ -109,7 +109,7 @@ theme: yilia
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repo: git@github.com:hongker/hongker.github.io.git  #这里的网址填你自己的
+  repo: https://github.com/hongker/hongker.github.io.git  #这里的网址填你自己的
   branch: master   
 
 jsonContnt:
