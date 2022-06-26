@@ -111,6 +111,7 @@ deploy:
   type: git
   repo: https://github.com/hongker/hongker.github.io.git  #这里的网址填你自己的
   branch: master   
+  local-dir: public
 
 jsonContnt:
   meta: false
