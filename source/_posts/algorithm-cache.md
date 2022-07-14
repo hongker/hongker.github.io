@@ -17,6 +17,10 @@ tags: algorithm
 
 ## Demo
 - 算法实现
+>利用链表的特性，将Put或Get调用的关键字，都放在队列的头部。每次触发容量上限，就先删除队列尾部的关键字。
+
+<!--more-->
+
 ```go
 package cache
 
