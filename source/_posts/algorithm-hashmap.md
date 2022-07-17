@@ -1,5 +1,5 @@
 ---
-title: Go数据结构与算法(10)-实现hashmap
+title: Go数据结构与算法(10)-hashmap
 date: 2022-07-14 21:11:25
 tags: algorithm
 ---
