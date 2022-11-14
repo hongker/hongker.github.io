@@ -89,11 +89,13 @@ func (s *Server) Start(bind string)  {
 // listen 监听
 func (s *Server) listen(lis *net.TCPListener) {
 	var (
-		conn *net.TCPConn
 		err  error
 	)
 
 	for {
+		// 必须在此处声明,如果跟err一样在外面声明，在高并发的场景下，会导致有可能出现多个goroutine读取同一个conn，最终返回EOF等异常错误。
+		// PS:B站的goim开源项目就有这样的问题
+		var conn *net.TCPConn
 		// 监听客户端的链接,完成三次握手，得到一个链接对象
 		if conn, err = lis.AcceptTCP(); err != nil {
 			// if listener close then return
@@ -126,7 +128,7 @@ func  (s *Server) handle(conn *net.TCPConn)  {
 	for {
 		// 用一个4k的数组来接收数据
 		var buf [4096]byte
-		n, err := reader.Read(buf[:])  // 读取数据
+		n, err := reader.Read(buf[:])  // 读取数据，必须保证只有一个协程在读取
 		if err != nil {
 			break
 		}
