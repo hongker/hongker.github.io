@@ -18,8 +18,15 @@ tags: golang
 
 <!--more-->
 
-## Demo
+## LengthFieldBasedFrameDecode
 实现一个基于消息头包含消息长度的协议的解码器来处理粘包问题
+- 协议设计:设置header是长度为4的字节数组，存储的是整个包体的长度length，比如body长度为n，那么length=n+4
+```
+|----- header -----|-------- body --------|
+|---length offset--|---------body---------|
+|        4         |          n           |
+```
+- Demo
 ```go
 
 // LengthFieldBasedFrameDecode implements Decoder interface by decode length field
