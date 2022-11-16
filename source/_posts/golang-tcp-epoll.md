@@ -1,10 +1,10 @@
 ---
-title: Golang系列(32)-基于reactor模型的tcp并发服务
+title: Golang系列(32)-Reactor模型(Epoll)
 date: 2022-11-15 22:56:47
 tags: golang
 ---
 
-本文将介绍通过epoll实现的reactor并发模型的tcp服务。
+本文将Reactor并发模型与Epoll的实现
 
 更多请参考：我的自研网络框架 [znet](https://github.com/ebar-go/znet)，欢迎Star与提Issue。
 
@@ -17,11 +17,13 @@ tags: golang
 交互图如下（来自网络）：
 ![Reactor模型](https://pic3.zhimg.com/80/v2-30401fced0ce7a24ac6299f785bc16fa_720w.webp)
 
-
+## 为什么要用Reactor模型
+相比常规模式的为每个连接开启一个线程来读取和写入数据，Reactor模型只需要一个主线程就能管理所有的连接。这样可以极大的节省内存占用。
 
 ## Epoll
 > epoll 全称 eventpoll，是 linux 内核实现IO多路复用（IO multiplexing）的一个实现。IO多路复用的意思是在一个操作里同时监听多个输入输出源，在其中一个或多个输入输出源可用的时候返回，然后对其的进行读写操作。
 
+linux下主要是通过epoll实现的reactor模型。
 <!--more-->
 
 ### 关键函数
