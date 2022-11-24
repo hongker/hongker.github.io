@@ -9,8 +9,13 @@ tags: golang
 
 更多请参考：我的自研网络框架 [znet](https://github.com/ebar-go/znet)，欢迎Star与提Issue。
 
+## Reactor实现方案
+- 方案一：单进程/线程，启动单个Reactor，单个Acceptor。不用考虑进程间通信以及数据同步的问题,无法充分利用多核CPU。处理业务逻辑的时间不能太长，否则会延迟响应，所以不适用于计算机密集型的场景。
+- 方案二：单进程/多线程，启动单个Reactor,多个Acceptor。解决方案一的问题无法利用多核CPU的问题。但是它依然只有一个主线程处理业务，无法解决瞬时高并发带来的性能问题。
+- 方案三：多进程/多线程，启动多个Reactor(一个MainReactor+多个SubReactor)，多个Acceptor。主 Reactor 只负责监听事件，响应事件的工作交给了从 Reactor。
+
 ## 模块设计
-- Acceptor: 负责与客户端建立链接
+- Acceptor: 负责与客户端建立链接，并将连接发送给Reactor
 - Reactor: 通过Epoll负责注册连接与监听活跃连接
 - SubReactor: 负责管理连接,可支持分片特性，提高吞吐
 - Thread: 负责处理数据包的接收、解包、打包、发送,可支持多线程并发处理
