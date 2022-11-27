@@ -16,7 +16,7 @@ tags: golang
 - Acceptor: 连接接收模块，负责与客户端建立连接。
 - Reactor: 事件调度主模块，负责监听活跃连接以及注册回调事件(OnOpen/OnClose/OnMessage/OnError)。
 - SubReactor: 事件调度子模块，负责管理连接，以及执行新消息回调事件。
-- Thread: 多线程事件处理模块，负责处理客户端请求，包括读取、解包、处理逻辑、打包、发送数据等操作。
+- Thread: 多线程事件处理模块，利用协程池并发处理客户端请求，包括读取、解包、处理逻辑、打包、发送数据等操作。
 - Connection: 客户端连接抽象对象，同时支持TCP/WebSocket协议的连接。
 - Context: 请求上下文对象，负责携带客户端请求数据。
 - Engine: 请求处理引擎，负责执行Context。采用责任链的设计模式，提供注入中间件的使用方式。
@@ -153,3 +153,6 @@ func (shard *ShardSubReactor) GetConnection(fd int) *Connection {
 }
 
 ```
+
+- 利用自动伸缩的协程池设计，提高系统的并发处理能力。允许空闲时自动缩小协程数量，高并发时自动增加协程数量。
+更多请参考下一篇文章。
