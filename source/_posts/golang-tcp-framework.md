@@ -155,4 +155,3 @@ func (shard *ShardSubReactor) GetConnection(fd int) *Connection {
 ```
 
 - 利用自动伸缩的协程池设计，提高系统的并发处理能力。允许空闲时自动缩小协程数量，高并发时自动增加协程数量。
-更多请参考下一篇文章。
