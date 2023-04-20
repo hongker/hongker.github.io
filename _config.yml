@@ -49,7 +49,8 @@ highlight:
   auto_detect: false
   tab_replace: ''
   wrap: true
-  hljs: false
+  hhljs: true
+  theme: monokai
 prismjs:
   enable: false
   preprocess: true
