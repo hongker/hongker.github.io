@@ -130,6 +130,12 @@
     <div class="mid-col" q-class="show:isShow,hide:isShow|isFalse">
       
       
+      <a class="forkMe" style="position:absolute;z-index:999;top:0;right:0.5em;" 
+        href="https://github.com/hongker/hongker.github.io" target="_blank">
+        <img src="/img/forkme.png"
+          class="attachment-full size-full" alt="Fork me on GitHub" data-recalc-dims="1"></a>
+      
+      
 <nav id="mobile-nav">
   	<div class="overlay js-overlay" style="background: #4d4d4d"></div>
 	<div class="btnctn js-mobile-btnctn">
@@ -211,6 +217,104 @@
           </div>
           <div id="js-content" class="content-ll">
             
+
+  
+    <article id="post-algorithm-skiplist" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2023/04/18/algorithm-skiplist/" target="_blank">数据结构与算法(15)-跳表(SkipList)</a>
+  
+    </h1>
+  
+
+
+  
+  
+<a href="/2023/04/18/algorithm-skiplist/" class="archive-article-date">
+        <time datetime="2023-04-18T14:33:56.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-04-18</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>在redis中，利用SkipList实现了如SortedSet这样的数据结构。本文将介绍SkipList算法实现细节</p>
+<h2 id="什么是SkipList-跳表"><a href="#什么是SkipList-跳表" class="headerlink" title="什么是SkipList(跳表)"></a>什么是SkipList(跳表)</h2><blockquote>
+<p>跳表是一种基于多级索引的数据结构，用于快速查找链表中的数据。它的查询和插入操作都可以在 O(log n) 的时间复杂度内完成。</p>
+</blockquote>
+<ul>
+<li><p>设计思想<br>跳表的基本思想是为链表建立多级索引，每层索引包含了下一层索引的部分节点。较高层的索引节点可以直接跨越较低层的多个节点，从而实现了快速查找的功能。</p>
+</li>
+<li><p>适用场景<br>因为跳表具有简单、易实现、效率高等优点，所以被广泛应用于各类数据存储系统和搜索算法中。比如Redis的有序集合就是采用SkipList实现的</p>
+</li>
+</ul>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2>
+    
+    <a class="article-more-a" href="/2023/04/18/algorithm-skiplist/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">algorithm</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2023/04/18/algorithm-skiplist/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
 
   
     <article id="post-algorithm-stack" class="article article-type-post  article-index" itemscope itemprop="blogPost">
@@ -1221,104 +1325,6 @@
 
 
   
-    <article id="post-golang-tcp-callback" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2022/11/14/golang-tcp-callback/" target="_blank">Golang系列(31)-TCP回调函数</a>
-  
-    </h1>
-  
-
-
-  
-  
-<a href="/2022/11/14/golang-tcp-callback/" class="archive-article-date">
-        <time datetime="2022-11-14T11:42:27.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-11-14</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>本文介绍如何给tcp连接增加回调函数，和websocket一样，提供三个回调函数:OnOpen,OnClose,OnMessage。</p>
-<p>更多请参考：我的自研网络框架 <a target="_blank" rel="noopener" href="https://github.com/ebar-go/znet">znet</a>，欢迎Star与提Issue。</p>
-<h2 id="回调函数"><a href="#回调函数" class="headerlink" title="回调函数"></a>回调函数</h2><ul>
-<li>OnOpen: 连接建立成功后触发的回调函数。</li>
-<li>OnClose: 连接断开后触发的回调函数。</li>
-<li>OnMessage: 收到新消息时的回调函数。</li>
-</ul>
-<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>前面已经提到如何启动一个TCP服务，具体请点击：<a target="_blank" rel="noopener" href="http://127.0.0.1:4000/2022/06/26/golang-tcp/">TCP编程</a>。我们在此基础上去添加回调函数。</p>
-<ul>
-<li>Callback<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> network</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;net&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> ConnectionHandler <span class="function"><span class="keyword">func</span><span class="params">(conn *net.TCPConn)</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Callback manage connection callback handlers.</span></span><br><span class="line"><span class="keyword">type</span> Callback <span class="keyword">struct</span> &#123;</span><br><span class="line">	open    ConnectionHandler</span><br><span class="line">	<span class="built_in">close</span>   ConnectionHandler</span><br><span class="line">	request <span class="function"><span class="keyword">func</span><span class="params">(conn *net.TCPConn, msg []<span class="type">byte</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// triggerOpenEvent is called when the connection is established</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(callback *Callback)</span></span> triggerOpenEvent(conn *net.TCPConn) &#123;</span><br><span class="line">	<span class="keyword">if</span> callback.open != <span class="literal">nil</span> &#123;</span><br><span class="line">		callback.open(conn)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// triggerCloseEvent is called when the connection is closed</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(callback *Callback)</span></span> triggerCloseEvent(conn *net.TCPConn) &#123;</span><br><span class="line">	<span class="keyword">if</span> callback.<span class="built_in">close</span> != <span class="literal">nil</span> &#123;</span><br><span class="line">		callback.<span class="built_in">close</span>(conn)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// triggerRequestEvent is called when receive new message</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(callback *Callback)</span></span> triggerRequestEvent(conn *net.TCPConn, msg []<span class="type">byte</span>) &#123;</span><br><span class="line">	<span class="keyword">if</span> callback.request != <span class="literal">nil</span> &#123;</span><br><span class="line">		callback.request(conn, msg)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
-</ul>
-    
-    <a class="article-more-a" href="/2022/11/14/golang-tcp-callback/#more">more >></a>
-    
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2022/11/14/golang-tcp-callback/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/2/">Next &amp;raquo;</a>
@@ -1542,42 +1548,12 @@
             </li>
           
             <li class="search-li">
-              <a href="https://github.com/JoeyBling" target="_blank" 
+              <a href="https://github.com/hongker" target="_blank" 
                 class="search-title" >
                 
                   <i class="icon-link icon"></i>
                 
                 GitHub
-              </a>
-            </li>
-          
-            <li class="search-li">
-              <a href="https://gitee.com/zhousiwei" target="_blank" 
-                class="search-title" >
-                
-                  <i class="icon-link icon"></i>
-                
-                码云
-              </a>
-            </li>
-          
-            <li class="search-li">
-              <a href="https://www.jianshu.com/u/02cbf31a043a" target="_blank" 
-                class="search-title" >
-                
-                  <i class="icon-link icon"></i>
-                
-                简书
-              </a>
-            </li>
-          
-            <li class="search-li">
-              <a href="https://blog.csdn.net/qq_30930805" target="_blank" 
-                class="search-title" >
-                
-                  <i class="icon-link icon"></i>
-                
-                CSDN
               </a>
             </li>
           
@@ -1590,7 +1566,7 @@
     	<section class="tools-section tools-section-me" q-show="aboutme">
         
           
-  	  		<div class="aboutme-wrap" id="aboutme">主要涉及技术：<br>Java后端开发、聚合支付、<br>公众号开发、开源爱好者、Linux<br><br>联系QQ:2434387555<br><br>很惭愧<br><br>只做了一点微小的工作<br>谢谢大家</div>
+  	  		<div class="aboutme-wrap" id="aboutme">Golang、云原生、系统架构<br>现居：鹅厂<br><br>联系QQ:774601526<br><br>看心情更新博客<br>谢谢大家</div>
   	  	
     	</section>
     
@@ -1677,6 +1653,56 @@
   
   <!-- <script async type="text/javascript" size="90" alpha="0.2" zIndex="0" src="/plugins/ribbon.js/ribbon.min.js"></script> -->
   
+  
+    <script type="text/javascript" src="/plugins/live2d-widget.js/L2Dwidget.min.js"></script>
+<script type="text/javascript">
+  /**
+   * 完整配置请参考：https://l2dwidget.js.org/docs/class/src/index.js~L2Dwidget.html#instance-method-init
+   */
+  var pluginModelPath = "assets/", // 模型的文件路径，无需更改
+    pluginRootPath = "/live2d_models/"; // 插件的路径，无需更改
+  //特定的模型json文件名称
+  var modelPathJson = {
+    "epsilon2_1": "Epsilon2.1",
+    "gf": "Gantzert_Felixander",
+    "haru/01": "haru01",
+    "haru/02": "haru02",
+    "nietzsche": "nietzche"
+  }
+
+  
+    var modelName = "hibiki";
+  
+
+  var modelJsonPath = "";
+  if (modelPathJson[modelName]) {
+    modelJsonPath = pluginRootPath + modelName + "/" + pluginModelPath + modelPathJson[modelName] +
+      ".model.json";
+  } else {
+    modelJsonPath = pluginRootPath + modelName + "/" + pluginModelPath + modelName + ".model.json";
+  }
+  L2Dwidget.init({
+    model: {
+      jsonPath: modelJsonPath
+    },
+    display: {
+       position: "right", 
+       width: 145, 
+       height: 315, 
+       hOffset: 50, 
+      
+    },
+    mobile: {
+       show: false, 
+       scale: 0.6 
+    },
+    react: {
+       opacity: 0.8 
+    }
+  })
+
+</script>
+
   
   
 </body>

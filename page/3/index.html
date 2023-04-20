@@ -130,6 +130,12 @@
     <div class="mid-col" q-class="show:isShow,hide:isShow|isFalse">
       
       
+      <a class="forkMe" style="position:absolute;z-index:999;top:0;right:0.5em;" 
+        href="https://github.com/hongker/hongker.github.io" target="_blank">
+        <img src="/img/forkme.png"
+          class="attachment-full size-full" alt="Fork me on GitHub" data-recalc-dims="1"></a>
+      
+      
 <nav id="mobile-nav">
   	<div class="overlay js-overlay" style="background: #4d4d4d"></div>
 	<div class="btnctn js-mobile-btnctn">
@@ -211,6 +217,107 @@
           </div>
           <div id="js-content" class="content-ll">
             
+
+  
+    <article id="post-golang-tcp" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2022/06/26/golang-tcp/" target="_blank">Golang代码优化(29)-TCP编程</a>
+  
+    </h1>
+  
+
+
+  
+  
+<a href="/2022/06/26/golang-tcp/" class="archive-article-date">
+        <time datetime="2022-06-26T06:53:35.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-06-26</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>本文介绍在golang项目中，基于tcp协议的面向网络编程。</p>
+<h2 id="通信协议"><a href="#通信协议" class="headerlink" title="通信协议"></a>通信协议</h2><blockquote>
+<p>一般来说，基于C&#x2F;S架构实现的项目，都是基于长链接来实现的。协议有http、tcp、udp,重点介绍tcp。</p>
+</blockquote>
+<h2 id="流程说明"><a href="#流程说明" class="headerlink" title="流程说明"></a>流程说明</h2><ul>
+<li><p>服务端</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1.监听端口</span><br><span class="line">2.接收客户端的tcp链接</span><br><span class="line">3.创建goroutine,接收该链接的请求数据，并将相应数据发送给客户端。</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>客户端</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1.建立与服务端的链接</span><br><span class="line">2.发送请求数据，接收服务端返回的响应数据</span><br><span class="line">3.关闭链接</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>时序图<br><img src="http://processon.com/chart_image/62b805d2f346fb6dc581ecd2.png" alt="时序图"></p>
+</li>
+</ul>
+    
+    <a class="article-more-a" href="/2022/06/26/golang-tcp/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2022/06/26/golang-tcp/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
 
   
     <article id="post-algorithm-batcher" class="article article-type-post  article-index" itemscope itemprop="blogPost">
@@ -1151,111 +1258,6 @@
 
 
   
-    <article id="post-golang-di" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2021/03/31/golang-di/" target="_blank">Golang代码优化25-依赖注入</a>
-  
-    </h1>
-  
-
-
-  
-  
-<a href="/2021/03/31/golang-di/" class="archive-article-date">
-        <time datetime="2021-03-31T06:13:59.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-03-31</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>本文介绍在golang中如何通过依赖注入(Dependency Inject，简称DI)管理全局服务。</p>
-<h2 id="什么是DI"><a href="#什么是DI" class="headerlink" title="什么是DI"></a>什么是DI</h2><blockquote>
-<p>把有依赖关系的类放到容器中，解析出这些类的实例，就是依赖注入。</p>
-</blockquote>
-<h2 id="DI的作用"><a href="#DI的作用" class="headerlink" title="DI的作用"></a>DI的作用</h2><ul>
-<li>反面例子<br>现在我们有一个http应用，先来看下常规开发的main.go:<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="comment">// 生成config实例</span></span><br><span class="line">	config := NewConfig()</span><br><span class="line">	<span class="comment">// 连接数据库</span></span><br><span class="line">	db, err := ConnectDatabase(config)</span><br><span class="line">	<span class="comment">// 判断是否有错误</span></span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 生成repository实例，用于获取person数据，参数是db</span></span><br><span class="line">	personRepository := repo.NewPersonRepository(db)</span><br><span class="line">	<span class="comment">// 生成service实例，用于调用repository的方法</span></span><br><span class="line">	personService := service.NewPersonService(config, personRepository)</span><br><span class="line">	<span class="comment">// 生成http服务实例</span></span><br><span class="line">	server := NewServer(config, personService)</span><br><span class="line">	<span class="comment">// 启动http服务</span></span><br><span class="line">	server.Run()</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Server</span></span><br><span class="line"><span class="keyword">type</span> Server <span class="keyword">struct</span> &#123;</span><br><span class="line">	config        *config.Config</span><br><span class="line">	personService *service.PersonService</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Handler</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *Server)</span></span> Handler() http.Handler &#123;</span><br><span class="line">	mux := http.NewServeMux()</span><br><span class="line"></span><br><span class="line">	mux.HandleFunc(<span class="string">&quot;/people&quot;</span>, s.people)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> mux</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Run</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *Server)</span></span> Run() &#123;</span><br><span class="line">	httpServer := &amp;http.Server&#123;</span><br><span class="line">		Addr:    <span class="string">&quot;:&quot;</span> + s.config.Port,</span><br><span class="line">		Handler: s.Handler(),</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	httpServer.ListenAndServe()</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// people</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *Server)</span></span> people(w http.ResponseWriter, r *http.Request) &#123;</span><br><span class="line">	people := s.personService.FindAll()</span><br><span class="line">	bytes, _ := json.Marshal(people)</span><br><span class="line"></span><br><span class="line">	w.Header().Set(<span class="string">&quot;Content-Type&quot;</span>, <span class="string">&quot;application/json&quot;</span>)</span><br><span class="line">	w.WriteHeader(http.StatusOK)</span><br><span class="line">	w.Write(bytes)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// NewServer</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewServer</span><span class="params">(config *config.Config, service *service.PersonService)</span></span> *Server &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;Server&#123;</span><br><span class="line">		config:        config,</span><br><span class="line">		personService: service,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 其他new方法</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewConfig</span><span class="params">()</span></span> *Config &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ConnectDatabase</span><span class="params">(config *config.Config)</span></span> (*sql.DB, <span class="type">error</span>) &#123;</span><br><span class="line">    <span class="comment">// ... </span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewPersonRepository</span><span class="params">(database *sql.DB)</span></span> *PersonRepository &#123;</span><br><span class="line">    <span class="comment">// ... </span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewPersonService</span><span class="params">(config *config.Config, repository *repo.PersonRepository)</span></span> *PersonService &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-直接看<code>main()</code>,你会发现包含清晰的初始化流程。</li>
-</ul>
-<p>但是仔细想想，随着业务的扩展，我们如果把所有实例都在main函数里生成，main函数将变得越来越臃肿。</p>
-<p>而且这些基础服务的实例，如果在其他包里需要引入，你就得给每个需要用到服务的地方，通过参数的方式传递。类似<code>service.NewPersonService(config, personRepository)</code>方法，将<code>config</code>和<code>personRepository</code>传递到service包。</p>
-<ul>
-<li>问题   <ul>
-<li>如何让main函数变得优雅?</li>
-<li>如何管理全局服务实例?</li>
-<li>如何减少重复实例化对象时传递如<code>config</code>这样的基础实例?</li>
-</ul>
-</li>
-</ul>
-    
-    <a class="article-more-a" href="/2021/03/31/golang-di/#more">more >></a>
-    
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2021/03/31/golang-di/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/2/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/4/">Next &amp;raquo;</a>
@@ -1479,42 +1481,12 @@
             </li>
           
             <li class="search-li">
-              <a href="https://github.com/JoeyBling" target="_blank" 
+              <a href="https://github.com/hongker" target="_blank" 
                 class="search-title" >
                 
                   <i class="icon-link icon"></i>
                 
                 GitHub
-              </a>
-            </li>
-          
-            <li class="search-li">
-              <a href="https://gitee.com/zhousiwei" target="_blank" 
-                class="search-title" >
-                
-                  <i class="icon-link icon"></i>
-                
-                码云
-              </a>
-            </li>
-          
-            <li class="search-li">
-              <a href="https://www.jianshu.com/u/02cbf31a043a" target="_blank" 
-                class="search-title" >
-                
-                  <i class="icon-link icon"></i>
-                
-                简书
-              </a>
-            </li>
-          
-            <li class="search-li">
-              <a href="https://blog.csdn.net/qq_30930805" target="_blank" 
-                class="search-title" >
-                
-                  <i class="icon-link icon"></i>
-                
-                CSDN
               </a>
             </li>
           
@@ -1527,7 +1499,7 @@
     	<section class="tools-section tools-section-me" q-show="aboutme">
         
           
-  	  		<div class="aboutme-wrap" id="aboutme">主要涉及技术：<br>Java后端开发、聚合支付、<br>公众号开发、开源爱好者、Linux<br><br>联系QQ:2434387555<br><br>很惭愧<br><br>只做了一点微小的工作<br>谢谢大家</div>
+  	  		<div class="aboutme-wrap" id="aboutme">Golang、云原生、系统架构<br>现居：鹅厂<br><br>联系QQ:774601526<br><br>看心情更新博客<br>谢谢大家</div>
   	  	
     	</section>
     
@@ -1614,6 +1586,56 @@
   
   <!-- <script async type="text/javascript" size="90" alpha="0.2" zIndex="0" src="/plugins/ribbon.js/ribbon.min.js"></script> -->
   
+  
+    <script type="text/javascript" src="/plugins/live2d-widget.js/L2Dwidget.min.js"></script>
+<script type="text/javascript">
+  /**
+   * 完整配置请参考：https://l2dwidget.js.org/docs/class/src/index.js~L2Dwidget.html#instance-method-init
+   */
+  var pluginModelPath = "assets/", // 模型的文件路径，无需更改
+    pluginRootPath = "/live2d_models/"; // 插件的路径，无需更改
+  //特定的模型json文件名称
+  var modelPathJson = {
+    "epsilon2_1": "Epsilon2.1",
+    "gf": "Gantzert_Felixander",
+    "haru/01": "haru01",
+    "haru/02": "haru02",
+    "nietzsche": "nietzche"
+  }
+
+  
+    var modelName = "hibiki";
+  
+
+  var modelJsonPath = "";
+  if (modelPathJson[modelName]) {
+    modelJsonPath = pluginRootPath + modelName + "/" + pluginModelPath + modelPathJson[modelName] +
+      ".model.json";
+  } else {
+    modelJsonPath = pluginRootPath + modelName + "/" + pluginModelPath + modelName + ".model.json";
+  }
+  L2Dwidget.init({
+    model: {
+      jsonPath: modelJsonPath
+    },
+    display: {
+       position: "right", 
+       width: 145, 
+       height: 315, 
+       hOffset: 50, 
+      
+    },
+    mobile: {
+       show: false, 
+       scale: 0.6 
+    },
+    react: {
+       opacity: 0.8 
+    }
+  })
+
+</script>
+
   
   
 </body>

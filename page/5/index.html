@@ -130,6 +130,12 @@
     <div class="mid-col" q-class="show:isShow,hide:isShow|isFalse">
       
       
+      <a class="forkMe" style="position:absolute;z-index:999;top:0;right:0.5em;" 
+        href="https://github.com/hongker/hongker.github.io" target="_blank">
+        <img src="/img/forkme.png"
+          class="attachment-full size-full" alt="Fork me on GitHub" data-recalc-dims="1"></a>
+      
+      
 <nav id="mobile-nav">
   	<div class="overlay js-overlay" style="background: #4d4d4d"></div>
 	<div class="btnctn js-mobile-btnctn">
@@ -211,6 +217,105 @@
           </div>
           <div id="js-content" class="content-ll">
             
+
+  
+    <article id="post-golang-swagger" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2020/06/10/golang-swagger/" target="_blank">Golang代码优化19-自动生成API文档之Swagger</a>
+  
+    </h1>
+  
+
+
+  
+  
+<a href="/2020/06/10/golang-swagger/" class="archive-article-date">
+        <time datetime="2020-06-10T14:17:19.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-06-10</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>本文介绍如何巧妙的使用go-swagger自动生成API接口文档。</p>
+<!-- toc -->
+<h2 id="什么是swagger"><a href="#什么是swagger" class="headerlink" title="什么是swagger"></a>什么是swagger</h2><blockquote>
+<p>Swagger 是一个规范和完整的框架，用于生成、描述、调用和可视化 RESTful 风格的 Web 服务。</p>
+</blockquote>
+<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><ul>
+<li>下载swag工具<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// 通过go get下载并编译，在$GOPATH/bin目录下会生成swag命令，用于扫描注解。</span><br><span class="line">go get -u github.com/swaggo/swag/cmd/swag</span><br></pre></td></tr></table></figure></li>
+<li>引入ego框架,已集成好的gin-swagger组件<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go get github.com/ebar-go/ego</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="API文档初始化"><a href="#API文档初始化" class="headerlink" title="API文档初始化"></a>API文档初始化</h2><ul>
+<li>先写项目说明<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">// @title Swagger Example API</span></span><br><span class="line"><span class="comment">// @version 1.0</span></span><br><span class="line"><span class="comment">// @description This is a sample server Petstore server.</span></span><br><span class="line"><span class="comment">// @termsOfService http://swagger.io/terms/</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// @contact.name hongker</span></span><br><span class="line"><span class="comment">// @contact.url http://hongker.github.io</span></span><br><span class="line"><span class="comment">// @contact.email xiaok2013@live.com</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// @license.name Apache 2.0</span></span><br><span class="line"><span class="comment">// @license.url http://www.apache.org/licenses/LICENSE-2.0.html</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// @host localhost:8080</span></span><br><span class="line"><span class="comment">// @BasePath /v1</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span>  &#123;</span><br><span class="line">	s := http.NewServer()</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 加载路由</span></span><br><span class="line">	route.Load(s.Router)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 启动</span></span><br><span class="line">	secure.Panic(s.Start())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+    
+    <a class="article-more-a" href="/2020/06/10/golang-swagger/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2020/06/10/golang-swagger/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
 
   
     <article id="post-golang-rbac" class="article article-type-post  article-index" itemscope itemprop="blogPost">
@@ -1129,102 +1234,6 @@
 
 
   
-    <article id="post-golang-sql" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2020/04/07/golang-sql/" target="_blank">Golang代码优化12-gorm</a>
-  
-    </h1>
-  
-
-
-  
-  
-<a href="/2020/04/07/golang-sql/" class="archive-article-date">
-        <time datetime="2020-04-07T05:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-07</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>本文介绍再golang中通过gorm对mysql的操作。</p>
-<h2 id="什么是Gorm"><a href="#什么是Gorm" class="headerlink" title="什么是Gorm"></a>什么是Gorm</h2><blockquote>
-<p>Golang写的，开发人员友好的ORM库。官方地址：<code>http://gorm.book.jasperxu.com/</code>.</p>
-</blockquote>
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go get -u github.com/jinzhu/gorm</span><br></pre></td></tr></table></figure>
-
-<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator">/</span><span class="operator">/</span> 创建数据库</span><br><span class="line"><span class="keyword">create</span> database test charset<span class="operator">=</span>utf8;</span><br><span class="line"></span><br><span class="line">use test;</span><br><span class="line"></span><br><span class="line"><span class="operator">/</span><span class="operator">/</span> 创建Users表</span><br><span class="line"><span class="keyword">drop</span> <span class="keyword">table</span> if <span class="keyword">exists</span> users;</span><br><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> users (</span><br><span class="line">    id <span class="type">int</span> unsigned <span class="keyword">not</span> <span class="keyword">null</span> <span class="keyword">primary</span> key auto_increment comment <span class="string">&#x27;主键&#x27;</span>,</span><br><span class="line">    username <span class="type">varchar</span>(<span class="number">50</span>) <span class="keyword">not</span> <span class="keyword">null</span> <span class="keyword">default</span> <span class="string">&#x27;&#x27;</span> comment <span class="string">&#x27;姓名&#x27;</span>,</span><br><span class="line">    password <span class="type">varchar</span>(<span class="number">32</span>) <span class="keyword">not</span> <span class="keyword">null</span> <span class="keyword">default</span> <span class="string">&#x27;&#x27;</span> comment <span class="string">&#x27;密码&#x27;</span>,</span><br><span class="line">    is_deleted tinyint unsigned <span class="keyword">not</span> <span class="keyword">null</span> <span class="keyword">default</span>  <span class="number">0</span> comment  <span class="string">&#x27;是否删除&#x27;</span>,</span><br><span class="line">    created_at  <span class="type">timestamp</span>    <span class="keyword">default</span> <span class="built_in">CURRENT_TIMESTAMP</span> <span class="keyword">not</span> <span class="keyword">null</span> comment <span class="string">&#x27;创建时间&#x27;</span>,</span><br><span class="line">    updated_at  <span class="type">timestamp</span>    <span class="keyword">default</span> <span class="built_in">CURRENT_TIMESTAMP</span> <span class="keyword">not</span> <span class="keyword">null</span> <span class="keyword">on</span> <span class="keyword">update</span> <span class="built_in">CURRENT_TIMESTAMP</span> comment <span class="string">&#x27;更新时间&#x27;</span>,</span><br><span class="line">    key `idx_del`(`is_deleted`)</span><br><span class="line">)engine<span class="operator">=</span>Innodb charset<span class="operator">=</span>utf8mb4 comment<span class="operator">=</span><span class="string">&#x27;示例&#x27;</span>;</span><br></pre></td></tr></table></figure>
-
-<h2 id="创建Connection"><a href="#创建Connection" class="headerlink" title="创建Connection"></a>创建Connection</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Connection 创建数据库连接</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Connection</span><span class="params">()</span></span> *gorm.DB &#123;</span><br><span class="line">    <span class="comment">// dsn的格式为 用户名:密码/tcp(主机地址)/数据库名称?charset=字符格式</span></span><br><span class="line">	dsn := <span class="string">&quot;root:123456@tcp(10.0.75.2)/test?charset=utf8&amp;parseTime=True&amp;loc=Local&quot;</span></span><br><span class="line">	db, err := gorm.Open(<span class="string">&quot;mysql&quot;</span>, dsn)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> db</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-    
-    <a class="article-more-a" href="/2020/04/07/golang-sql/#more">more >></a>
-    
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2020/04/07/golang-sql/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/4/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/6/">Next &amp;raquo;</a>
@@ -1448,42 +1457,12 @@
             </li>
           
             <li class="search-li">
-              <a href="https://github.com/JoeyBling" target="_blank" 
+              <a href="https://github.com/hongker" target="_blank" 
                 class="search-title" >
                 
                   <i class="icon-link icon"></i>
                 
                 GitHub
-              </a>
-            </li>
-          
-            <li class="search-li">
-              <a href="https://gitee.com/zhousiwei" target="_blank" 
-                class="search-title" >
-                
-                  <i class="icon-link icon"></i>
-                
-                码云
-              </a>
-            </li>
-          
-            <li class="search-li">
-              <a href="https://www.jianshu.com/u/02cbf31a043a" target="_blank" 
-                class="search-title" >
-                
-                  <i class="icon-link icon"></i>
-                
-                简书
-              </a>
-            </li>
-          
-            <li class="search-li">
-              <a href="https://blog.csdn.net/qq_30930805" target="_blank" 
-                class="search-title" >
-                
-                  <i class="icon-link icon"></i>
-                
-                CSDN
               </a>
             </li>
           
@@ -1496,7 +1475,7 @@
     	<section class="tools-section tools-section-me" q-show="aboutme">
         
           
-  	  		<div class="aboutme-wrap" id="aboutme">主要涉及技术：<br>Java后端开发、聚合支付、<br>公众号开发、开源爱好者、Linux<br><br>联系QQ:2434387555<br><br>很惭愧<br><br>只做了一点微小的工作<br>谢谢大家</div>
+  	  		<div class="aboutme-wrap" id="aboutme">Golang、云原生、系统架构<br>现居：鹅厂<br><br>联系QQ:774601526<br><br>看心情更新博客<br>谢谢大家</div>
   	  	
     	</section>
     
@@ -1583,6 +1562,56 @@
   
   <!-- <script async type="text/javascript" size="90" alpha="0.2" zIndex="0" src="/plugins/ribbon.js/ribbon.min.js"></script> -->
   
+  
+    <script type="text/javascript" src="/plugins/live2d-widget.js/L2Dwidget.min.js"></script>
+<script type="text/javascript">
+  /**
+   * 完整配置请参考：https://l2dwidget.js.org/docs/class/src/index.js~L2Dwidget.html#instance-method-init
+   */
+  var pluginModelPath = "assets/", // 模型的文件路径，无需更改
+    pluginRootPath = "/live2d_models/"; // 插件的路径，无需更改
+  //特定的模型json文件名称
+  var modelPathJson = {
+    "epsilon2_1": "Epsilon2.1",
+    "gf": "Gantzert_Felixander",
+    "haru/01": "haru01",
+    "haru/02": "haru02",
+    "nietzsche": "nietzche"
+  }
+
+  
+    var modelName = "hibiki";
+  
+
+  var modelJsonPath = "";
+  if (modelPathJson[modelName]) {
+    modelJsonPath = pluginRootPath + modelName + "/" + pluginModelPath + modelPathJson[modelName] +
+      ".model.json";
+  } else {
+    modelJsonPath = pluginRootPath + modelName + "/" + pluginModelPath + modelName + ".model.json";
+  }
+  L2Dwidget.init({
+    model: {
+      jsonPath: modelJsonPath
+    },
+    display: {
+       position: "right", 
+       width: 145, 
+       height: 315, 
+       hOffset: 50, 
+      
+    },
+    mobile: {
+       show: false, 
+       scale: 0.6 
+    },
+    react: {
+       opacity: 0.8 
+    }
+  })
+
+</script>
+
   
   
 </body>

@@ -6,19 +6,21 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://hongker.github.io">
-  <title>Archives: 2018 | Hongker的博客</title>
+  <title>数据结构与算法(15)-跳表(SkipList) | Hongker的博客</title>
   <meta name="generator" content="hexo-theme-yilia-plus">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
-  <meta name="description" content="做喜欢做的事,不断提高自身的水平">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Hongker的博客">
-<meta property="og:url" content="https://hongker.github.io/archives/2018/index.html">
+  <meta name="description" content="在redis中，利用SkipList实现了如SortedSet这样的数据结构。本文将介绍SkipList算法实现细节 什么是SkipList(跳表) 跳表是一种基于多级索引的数据结构，用于快速查找链表中的数据。它的查询和插入操作都可以在 O(log n) 的时间复杂度内完成。   设计思想跳表的基本思想是为链表建立多级索引，每层索引包含了下一层索引的部分节点。较高层的索引节点可以直接跨越较低层的多">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数据结构与算法(15)-跳表(SkipList)">
+<meta property="og:url" content="https://hongker.github.io/2023/04/18/algorithm-skiplist/index.html">
 <meta property="og:site_name" content="Hongker的博客">
-<meta property="og:description" content="做喜欢做的事,不断提高自身的水平">
+<meta property="og:description" content="在redis中，利用SkipList实现了如SortedSet这样的数据结构。本文将介绍SkipList算法实现细节 什么是SkipList(跳表) 跳表是一种基于多级索引的数据结构，用于快速查找链表中的数据。它的查询和插入操作都可以在 O(log n) 的时间复杂度内完成。   设计思想跳表的基本思想是为链表建立多级索引，每层索引包含了下一层索引的部分节点。较高层的索引节点可以直接跨越较低层的多">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-04-18T14:33:56.000Z">
+<meta property="article:modified_time" content="2023-04-20T15:24:44.742Z">
 <meta property="article:author" content="Hongker">
-<meta property="article:tag" content="go,php,docker,k8s,微服务,blockchain">
+<meta property="article:tag" content="algorithm">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Hongker的博客" type="application/atom+xml">
@@ -212,226 +214,213 @@
               class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-algorithm-skiplist" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2018" class="archive-year">2018</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2018/12/24/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/" class="archive-article-date">
-        <time datetime="2018-12-24T12:56:49.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-12-24</time>
-</a>
-
-        </div>
-    	 
+      <header class="article-header">
   
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2018/12/24/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/" target="_blank">单例模式</a>
   
+    <h1 class="article-title" itemprop="name">
+      数据结构与算法(15)-跳表(SkipList)
     </h1>
   
 
 
-        <div class="article-info info-on-right">
+  
+  
+        
+        <span id="busuanzi_container_page_pv" style='display:none' class="archive-article-date">
+              <i class="icon-smile icon"></i> 阅读数：<span id="busuanzi_value_page_pv"></span>次
+        </span>
+
+<a href="/2023/04/18/algorithm-skiplist/" class="archive-article-date">
+        <time datetime="2023-04-18T14:33:56.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-04-18</time>
+</a>
+
+  
+  
+    
+<div style="margin-top:10px;">
+  <span class="post-time">
+    <span class="post-meta-item-icon">
+      <!-- fonts.scss -->
+      <!-- 百度字体平台:http://fontstore.baidu.com/static/editor/index.html -->
+      <i class="icon-statistics"></i>
+      <span class="post-meta-item-text"> 字数统计:</span>
+      <span class="post-count">1.1k字</span>
+    </span>
+  </span>
+
+  <span class="post-time">
+    &nbsp; | &nbsp;
+    <span class="post-meta-item-icon">
+      <i class="icon-book icon"></i>
+      <span class="post-meta-item-text"> 阅读时长≈</span>
+      <span class="post-count">4分</span>
+    </span>
+  </span>
+</div>
+
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>在redis中，利用SkipList实现了如SortedSet这样的数据结构。本文将介绍SkipList算法实现细节</p>
+<h2 id="什么是SkipList-跳表"><a href="#什么是SkipList-跳表" class="headerlink" title="什么是SkipList(跳表)"></a>什么是SkipList(跳表)</h2><blockquote>
+<p>跳表是一种基于多级索引的数据结构，用于快速查找链表中的数据。它的查询和插入操作都可以在 O(log n) 的时间复杂度内完成。</p>
+</blockquote>
+<ul>
+<li><p>设计思想<br>跳表的基本思想是为链表建立多级索引，每层索引包含了下一层索引的部分节点。较高层的索引节点可以直接跨越较低层的多个节点，从而实现了快速查找的功能。</p>
+</li>
+<li><p>适用场景<br>因为跳表具有简单、易实现、效率高等优点，所以被广泛应用于各类数据存储系统和搜索算法中。比如Redis的有序集合就是采用SkipList实现的</p>
+</li>
+</ul>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><span id="more"></span>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 定义一个节点结构体</span></span><br><span class="line"><span class="keyword">type</span> node <span class="keyword">struct</span> &#123;</span><br><span class="line">    key <span class="type">int</span>          <span class="comment">// 节点键值</span></span><br><span class="line">    value <span class="keyword">interface</span>&#123;&#125;  <span class="comment">// 节点储存数据值</span></span><br><span class="line">    next []*node       <span class="comment">// 节点所在层数的指针数组</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 跳表结构体定义</span></span><br><span class="line"><span class="keyword">type</span> SkipList <span class="keyword">struct</span> &#123;</span><br><span class="line">    head *node            <span class="comment">// 头节点</span></span><br><span class="line">    maxLevels <span class="type">int</span>         <span class="comment">// 最大层数</span></span><br><span class="line">    p <span class="type">float32</span>             <span class="comment">// 索引分布概率参数</span></span><br><span class="line">    level <span class="type">int</span>             <span class="comment">// 当前层数</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 新建跳表节点的函数</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">newSkipListNode</span><span class="params">(key <span class="type">int</span>, value <span class="keyword">interface</span>&#123;&#125;, level <span class="type">int</span>)</span></span> *node &#123;</span><br><span class="line">    <span class="keyword">return</span> &amp;node&#123;</span><br><span class="line">        key: key,</span><br><span class="line">        value: value,</span><br><span class="line">        next: <span class="built_in">make</span>([]*node, level),   <span class="comment">// 根据level新建next切片</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建跳表的函数</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewSkipList</span><span class="params">(p <span class="type">float32</span>, maxLevels <span class="type">int</span>)</span></span> *SkipList &#123;</span><br><span class="line">    head := newSkipListNode(<span class="number">0</span>, <span class="literal">nil</span>, maxLevels)     <span class="comment">//新建头节点</span></span><br><span class="line">    <span class="keyword">return</span> &amp;SkipList&#123;head: head, maxLevels: maxLevels, p: p&#125;  <span class="comment">//返回跳表结构体指针</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 插入数据的函数</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *SkipList)</span></span> Insert(key <span class="type">int</span>, value <span class="keyword">interface</span>&#123;&#125;) &#123;</span><br><span class="line">    current := s.head    <span class="comment">// 设置当前节点为头节点</span></span><br><span class="line">    update := <span class="built_in">make</span>([]*node, s.maxLevels)  <span class="comment">//创建更新数组用来记录每层需要更新的节点</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 搜索待插入节点的位置，并记录每一层需要更新的节点</span></span><br><span class="line">    <span class="keyword">for</span> i := s.level - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i-- &#123;</span><br><span class="line">        <span class="comment">// 找到i层上第一个键值小于要插入的key值的节点</span></span><br><span class="line">        <span class="keyword">for</span> current.next[i] != <span class="literal">nil</span> &amp;&amp; current.next[i].key &lt; key &#123;</span><br><span class="line">            current = current.next[i]</span><br><span class="line">        &#125;</span><br><span class="line">        update[i] = current   <span class="comment">// 将搜索到的节点记录在更新数组中</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果要插入的节点已经存在，直接更新其值即可</span></span><br><span class="line">    <span class="keyword">if</span> current.next[<span class="number">0</span>] != <span class="literal">nil</span> &amp;&amp; current.next[<span class="number">0</span>].key == key &#123;</span><br><span class="line">        current.next[<span class="number">0</span>].value = value</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 根据索引分布概率参数随机生成新节点的层数</span></span><br><span class="line">    newLevel := s.randomLevel()</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果新建节点的层数大于当前跳表的层数，需要为更高的层次更新指针</span></span><br><span class="line">    <span class="keyword">if</span> newLevel &gt; s.level &#123;</span><br><span class="line">        <span class="keyword">for</span> i := s.level; i &lt; newLevel; i++ &#123;</span><br><span class="line">            update[i] = s.head</span><br><span class="line">        &#125;</span><br><span class="line">        s.level = newLevel</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建新的节点并依次与原来的节点相连</span></span><br><span class="line">    newNode := newSkipListNode(key, value, newLevel)</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; newLevel; i++ &#123;</span><br><span class="line">        newNode.next[i] = update[i].next[i]</span><br><span class="line">        update[i].next[i] = newNode</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 查找数据的函数</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *SkipList)</span></span> Search(key <span class="type">int</span>) <span class="keyword">interface</span>&#123;&#125; &#123;</span><br><span class="line">    current := s.head</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 从顶层向底层开始搜索</span></span><br><span class="line">    <span class="keyword">for</span> i := s.level - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i-- &#123;</span><br><span class="line">        <span class="comment">// 在当前层上找到第一个键值大于等于要查询的key值的节点</span></span><br><span class="line">        <span class="keyword">for</span> current.next[i] != <span class="literal">nil</span> &amp;&amp; current.next[i].key &lt; key &#123;</span><br><span class="line">            current = current.next[i]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 检查找到的节点是否是要查找的key值节点</span></span><br><span class="line">    <span class="keyword">if</span> current.next[<span class="number">0</span>] != <span class="literal">nil</span> &amp;&amp; current.next[<span class="number">0</span>].key == key &#123;</span><br><span class="line">        <span class="keyword">return</span> current.next[<span class="number">0</span>].value</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 若未找到，返回nil值</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 删除数据的函数</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *SkipList)</span></span> Delete(key <span class="type">int</span>) &#123;</span><br><span class="line">    current := s.head      <span class="comment">// 设置当前节点为头节点</span></span><br><span class="line">    update := <span class="built_in">make</span>([]*node, s.maxLevels)  <span class="comment">// 创建更新数组用来记录每层需要更新的节点</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 搜索待删除节点的位置，并记录每一层需要更新的节点</span></span><br><span class="line">    <span class="keyword">for</span> i := s.level - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i-- &#123;</span><br><span class="line">        <span class="comment">// 找到i层上第一个键值小于要插入的key值的节点</span></span><br><span class="line">        <span class="keyword">for</span> current.next[i] != <span class="literal">nil</span> &amp;&amp; current.next[i].key &lt; key &#123;</span><br><span class="line">            current = current.next[i]</span><br><span class="line">        &#125;</span><br><span class="line">        update[i] = current   <span class="comment">// 将搜索到的节点记录在更新数组中</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果要删除的节点存在，则依次将它与前一个节点相连，直到所有的层数都删除</span></span><br><span class="line">    <span class="keyword">if</span> current.next[<span class="number">0</span>] == <span class="literal">nil</span> || current.next[<span class="number">0</span>].key != key &#123;</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; s.level; i++ &#123;</span><br><span class="line">        <span class="keyword">if</span> update[i].next[i] == current.next[<span class="number">0</span>] &#123;</span><br><span class="line">            update[i].next[i] = current.next[<span class="number">0</span>].next[i]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 调整跳表的层数</span></span><br><span class="line">    <span class="keyword">for</span> s.level &gt; <span class="number">1</span> &amp;&amp; s.head.next[s.level<span class="number">-1</span>] == <span class="literal">nil</span> &#123;</span><br><span class="line">        s.level--</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 随机生成节点层数的函数</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *SkipList)</span></span> randomLevel() <span class="type">int</span> &#123;</span><br><span class="line">    level := <span class="number">1</span></span><br><span class="line">    <span class="keyword">for</span> rand.Float32() &lt; s.p &amp;&amp; level &lt; s.maxLevels &#123;</span><br><span class="line">        level++</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> level</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    
+
+    
+
+    
+    <div class="declare"> 
+      <ul class="post-copyright">
+        <li>
+          <strong>本文作者：</strong>
+          Hongker
+        </li>
+        <li>
+          <strong>本文链接：</strong>
+          <a href="https://hongker.github.io/2023/04/18/algorithm-skiplist/" title="数据结构与算法(15)-跳表(SkipList)" target="_blank">https://hongker.github.io/2023/04/18/algorithm-skiplist/</a>
+        </li>
+        
+        <li>
+          <strong>版权声明： </strong>
           
+          本博客所有文章除特别声明外，均采用 <a href="https://github.com/JoeyBling/hexo-theme-yilia-plus/blob/master/LICENSE" rel="external nofollow" target="_blank">MIT</a> 许可协议。转载请注明出处！
+        </li>
+        
+      </ul>
+    </div>
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">设计模式</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">algorithm</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+    
 
+    
+
+    
+    
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <!-- <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a> -->
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+     <!-- <img src="//pan.baidu.com/share/qrcode?url=https://hongker.github.io/2023/04/18/algorithm-skiplist/" alt="微信分享二维码"> -->
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+
+    
+    <div class="clearfix"></div>
+  </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2018/12/24/designMode/" class="archive-article-date">
-        <time datetime="2018-12-24T12:31:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-12-24</time>
-</a>
 
+
+<nav id="article-nav">
+  
+  
+    <a href="/2023/02/08/algorithm-stack/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Go数据结构与算法(14)-栈(Stack)</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2018/12/24/designMode/" target="_blank">设计模式</a>
-  
-    </h1>
-  
+        
+        
+    </div>
+</aside>
 
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">设计模式</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2018/12/13/docker%E5%91%BD%E4%BB%A4%E8%AF%B4%E6%98%8E/" class="archive-article-date">
-        <time datetime="2018-12-13T13:42:26.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-12-13</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2018/12/13/docker%E5%91%BD%E4%BB%A4%E8%AF%B4%E6%98%8E/" target="_blank">docker命令说明</a>
-  
-    </h1>
-  
 
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">docker</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2018/12/11/docker/" class="archive-article-date">
-        <time datetime="2018-12-11T14:02:10.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-12-11</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2018/12/11/docker/" target="_blank">docker介绍与安装</a>
-  
-    </h1>
-  
 
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">docker</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	
-<a href="/2018/12/10/target/" class="archive-article-date">
-        <time datetime="2018-12-10T14:09:31.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-12-10</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-	
-	  <a class="archive-article-title" href="/2018/12/10/target/" target="_blank">目标</a>
-  
-    </h1>
-  
 
 
-        <div class="article-info info-on-right">
-          
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
 
-    
+
+
 
 
           </div>
@@ -472,8 +461,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: true,
