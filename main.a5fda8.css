@@ -890,7 +890,11 @@ body {
     font-size: .9em;
     line-height: 22.400000000000002px
 }
+.article-entry pre.mermaid {
+    background: #fff;
+    border: 0px;
 
+}
 .article-entry .highlight::-webkit-scrollbar,.article-entry pre::-webkit-scrollbar {
     height: 10px;
     width: 7px;

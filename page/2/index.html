@@ -45,9 +45,6 @@
   
 
   
-    
- 	  <script src="/lib/clickLove.js"></script>
-  
   
 
 
@@ -78,17 +75,17 @@
 		<nav class="header-menu">
 			<ul>
 			
-				<li><a href="/" target="_blank">主页</a></li>
+				<li><a href="/" >主页</a></li>
 			
-				<li><a href="/tags/golang" target="_blank">Golang</a></li>
+				<li><a href="/tags/golang" >Golang</a></li>
 			
-				<li><a href="/tags/micro-service" target="_blank">微服务</a></li>
+				<li><a href="/tags/micro-service" >微服务</a></li>
 			
-				<li><a href="/tags/kubernetes" target="_blank">K8S</a></li>
+				<li><a href="/tags/kubernetes" >K8S</a></li>
 			
-				<li><a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" target="_blank">设计模式</a></li>
+				<li><a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" >设计模式</a></li>
 			
-				<li><a href="/tags/algorithm" target="_blank">数据结构与算法</a></li>
+				<li><a href="/tags/algorithm" >数据结构与算法</a></li>
 			
 			</ul>
 		</nav>
@@ -111,13 +108,13 @@
 			<div class="social">
 				
 					
-						<a class="github" href="https://github.com/hongker" 
-												title="GitHub" target="_blank"><i class="icon-github"></i></a>
+						<a class="github" target="_blank" rel="noopener" href="https://github.com/hongker" 
+												title="GitHub" ><i class="icon-github"></i></a>
 					
 				
 					
 						<a class="mail" href="mailto:xiaok2013@live.com" 
-												title="Email" target="_blank"><i class="icon-mail"></i></a>
+												title="Email" ><i class="icon-mail"></i></a>
 					
 				
 			</div>
@@ -219,6 +216,108 @@
             
 
   
+    <article id="post-golang-tcp-epoll" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2022/11/15/golang-tcp-epoll/">Golang系列(32)-Reactor模型(Epoll)</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2022/11/15/golang-tcp-epoll/" class="archive-article-date">
+        <time datetime="2022-11-15T14:56:47.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-11-15</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>本文将Reactor并发模型与Epoll的实现</p>
+<p>更多请参考：我的自研网络框架 <a target="_blank" rel="noopener" href="https://github.com/ebar-go/znet">znet</a>，欢迎Star与提Issue。</p>
+<h2 id="Reactor"><a href="#Reactor" class="headerlink" title="Reactor"></a>Reactor</h2><blockquote>
+<p>Reactor模式，是指通过一个或多个输入同时传递给服务处理器的服务请求的事件驱动处理模式。 </p>
+</blockquote>
+<ul>
+<li>普通的函数处理机制为：调用某函数-&gt; 函数执行， 主程序等待阻塞-&gt; 函数将结果返回给主程序-&gt; 主程序继续执行。 </li>
+<li>Reactor 事件处理机制为：主程序将事件以及对应事件处理的方法在 Reactor 上进行注册，如果相应的事件发生，Reactor 将会主动调用事件注册的接口，即 回调函数。</li>
+</ul>
+<p>交互图如下（来自网络）：<br><img src="https://pic3.zhimg.com/80/v2-30401fced0ce7a24ac6299f785bc16fa_720w.webp" alt="Reactor模型"></p>
+<h2 id="为什么要用Reactor模型"><a href="#为什么要用Reactor模型" class="headerlink" title="为什么要用Reactor模型"></a>为什么要用Reactor模型</h2><p>相比常规模式的为每个连接开启一个线程来读取和写入数据，Reactor模型只需要一个主线程就能管理所有的连接。这样可以极大的节省内存占用。</p>
+<h2 id="Epoll"><a href="#Epoll" class="headerlink" title="Epoll"></a>Epoll</h2><blockquote>
+<p>epoll 全称 eventpoll，是 linux 内核实现IO多路复用（IO multiplexing）的一个实现。IO多路复用的意思是在一个操作里同时监听多个输入输出源，在其中一个或多个输入输出源可用的时候返回，然后对其的进行读写操作。</p>
+</blockquote>
+<p>linux下主要是通过epoll实现的reactor模型。</p>
+    
+    <a class="article-more-a" href="/2022/11/15/golang-tcp-epoll/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2022/11/15/golang-tcp-epoll/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-golang-tcp-callback" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -227,8 +326,8 @@
   
     <h1 itemprop="name">
 	
-	  <a class="article-title" href="/2022/11/14/golang-tcp-callback/" target="_blank">Golang系列(31)-TCP回调函数</a>
-  
+	  <a class="article-title" href="/2022/11/14/golang-tcp-callback/">Golang系列(31)-TCP回调函数</a>
+	
     </h1>
   
 
@@ -325,8 +424,8 @@
   
     <h1 itemprop="name">
 	
-	  <a class="article-title" href="/2022/11/14/golang-packet/" target="_blank">Golang系列(30)-TCP粘包/拆包问题分析与解决</a>
-  
+	  <a class="article-title" href="/2022/11/14/golang-packet/">Golang系列(30)-TCP粘包/拆包问题分析与解决</a>
+	
     </h1>
   
 
@@ -428,8 +527,8 @@
   
     <h1 itemprop="name">
 	
-	  <a class="article-title" href="/2022/11/06/algorithm-consitent-hash/" target="_blank">Go数据结构与算法(13)-一致性哈希算法</a>
-  
+	  <a class="article-title" href="/2022/11/06/algorithm-consitent-hash/">Go数据结构与算法(13)-一致性哈希算法</a>
+	
     </h1>
   
 
@@ -530,8 +629,8 @@
   
     <h1 itemprop="name">
 	
-	  <a class="article-title" href="/2022/07/19/algorithm-timewheel/" target="_blank">Go数据结构与算法(12)-时间轮计时器</a>
-  
+	  <a class="article-title" href="/2022/07/19/algorithm-timewheel/">Go数据结构与算法(12)-时间轮计时器</a>
+	
     </h1>
   
 
@@ -625,8 +724,8 @@
   
     <h1 itemprop="name">
 	
-	  <a class="article-title" href="/2022/07/17/algorithm-delayqueue/" target="_blank">Go数据结构与算法(11)-延时队列</a>
-  
+	  <a class="article-title" href="/2022/07/17/algorithm-delayqueue/">Go数据结构与算法(11)-延时队列</a>
+	
     </h1>
   
 
@@ -723,8 +822,8 @@
   
     <h1 itemprop="name">
 	
-	  <a class="article-title" href="/2022/07/14/algorithm-hashmap/" target="_blank">Go数据结构与算法(10)-hashmap</a>
-  
+	  <a class="article-title" href="/2022/07/14/algorithm-hashmap/">Go数据结构与算法(10)-hashmap</a>
+	
     </h1>
   
 
@@ -821,8 +920,8 @@
   
     <h1 itemprop="name">
 	
-	  <a class="article-title" href="/2022/07/14/algorithm-cache/" target="_blank">Go数据结构与算法(09)-基于LRU算法的缓存</a>
-  
+	  <a class="article-title" href="/2022/07/14/algorithm-cache/">Go数据结构与算法(09)-基于LRU算法的缓存</a>
+	
     </h1>
   
 
@@ -913,8 +1012,8 @@
   
     <h1 itemprop="name">
 	
-	  <a class="article-title" href="/2022/07/09/algorithm-bplustree/" target="_blank">Go数据结构与算法(08)-B+Tree</a>
-  
+	  <a class="article-title" href="/2022/07/09/algorithm-bplustree/">Go数据结构与算法(08)-B+Tree</a>
+	
     </h1>
   
 
@@ -1022,8 +1121,8 @@
   
     <h1 itemprop="name">
 	
-	  <a class="article-title" href="/2022/07/03/algorithm-btree/" target="_blank">Go数据结构与算法(07)-BTree</a>
-  
+	  <a class="article-title" href="/2022/07/03/algorithm-btree/">Go数据结构与算法(07)-BTree</a>
+	
     </h1>
   
 
@@ -1117,101 +1216,6 @@
 
 
   
-    <article id="post-algorithm-bitmap" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2022/06/29/algorithm-bitmap/" target="_blank">Go数据结构与算法(06)-Bitmap</a>
-  
-    </h1>
-  
-
-
-  
-  
-<a href="/2022/06/29/algorithm-bitmap/" class="archive-article-date">
-        <time datetime="2022-06-29T12:43:36.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-06-29</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>本文将介绍Bitmap的使用场景与算法实现。</p>
-<h2 id="什么是Bitmap"><a href="#什么是Bitmap" class="headerlink" title="什么是Bitmap"></a>什么是Bitmap</h2><blockquote>
-<p>所谓的Bit-map就是用一个bit位来标记某个元素对应的Value， 而Key即是该元素。比如将第4位字节设为1，就代表某个集合已存在ID为4的记录。</p>
-</blockquote>
-<h2 id="适用场景"><a href="#适用场景" class="headerlink" title="适用场景"></a>适用场景</h2><p>由于存储数据的是非常小的字节，所以bitmap能节省超大空间，可以用来处理大量数据的排序、查询以及去重。</p>
-<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><h3 id="Bitmap"><a href="#Bitmap" class="headerlink" title="Bitmap"></a>Bitmap</h3><ul>
-<li>实现<br>通过一个uint64的变量可以存储64位数据。<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> bit</span><br><span class="line"><span class="comment">// Bitmap 支持存储64个字节</span></span><br><span class="line"><span class="keyword">type</span> Bitmap <span class="type">uint64</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(b Bitmap)</span></span> Set(pos <span class="type">uint64</span>) Bitmap &#123;</span><br><span class="line">	<span class="comment">// 1.根据位移运算，得到一个指定位置为1的数字，比如pos为4,则得到的是 0001 0000</span></span><br><span class="line">	<span class="comment">// 2.通过按位异或运算将值设置上去</span></span><br><span class="line">	<span class="keyword">return</span> b | (<span class="number">1</span> &lt;&lt; pos)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(b Bitmap)</span></span> Clear(pos <span class="type">uint64</span>) Bitmap &#123;</span><br><span class="line">	<span class="comment">// 1.位移运算得到指定位置为1的数字，如：0001 0000</span></span><br><span class="line">	<span class="comment">// 2.取反,如：1110 1111</span></span><br><span class="line">	<span class="comment">// 3.按位与,如b为 0011 0000,最终结果为: 0010 0000</span></span><br><span class="line">	<span class="keyword">return</span> b &amp; ^(<span class="number">1</span> &lt;&lt; pos)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(b Bitmap)</span></span> Has(pos <span class="type">uint64</span>) <span class="type">bool</span> &#123;</span><br><span class="line">	<span class="comment">// 1.位移运算得到指定位置为1的数字，如：0001 0000</span></span><br><span class="line">	<span class="comment">// 2.按位与,如b为 0011 0000,得到结果为：0001 0000</span></span><br><span class="line">	<span class="comment">// 3.只要结果不为0,则证明该位上的值为1</span></span><br><span class="line">	<span class="keyword">return</span> (b &amp; (<span class="number">1</span> &lt;&lt; pos)) != <span class="number">0</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// toNums 读取数据</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(b Bitmap)</span></span> toNums(offset <span class="type">uint64</span>, nums *[]<span class="type">uint64</span>) &#123;</span><br><span class="line">	<span class="keyword">for</span> i := <span class="type">uint64</span>(<span class="number">0</span>); i &lt; <span class="number">64</span>; i++ &#123;</span><br><span class="line">		<span class="keyword">if</span> b.Has(i) &#123;</span><br><span class="line">			*nums = <span class="built_in">append</span>(*nums, i+offset)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(b Bitmap)</span></span> Count() <span class="type">int</span> &#123;</span><br><span class="line">	val := b</span><br><span class="line">	<span class="comment">// 将b的二进制分为32等份，计算每个部分含1的个数。</span></span><br><span class="line">	<span class="comment">// 示例：10 11 10 01 00 11 10 11 00 01 10 01 10 00 01 00 10 11 10 01 00 11 10 11 00 01 10 01 10 00 01 00</span></span><br><span class="line">	<span class="comment">// 经过运算：01 10 01 01 00 10 01 10 00 01 01 01 01 00 01 00 01 10 01 01 00 10 01 10 00 01 01 01 01 00 01 00</span></span><br><span class="line">	val = (val &amp; <span class="number">0x5555555555555555</span>) + ((val &gt;&gt; <span class="number">1</span>) &amp; <span class="number">0x5555555555555555</span>)</span><br><span class="line">	<span class="comment">// 后面的计算就是一步步地将每部分的值加起来</span></span><br><span class="line">	<span class="comment">// 第1部分+第2部分，第3部分+第4部分，...第31部分+第32部分</span></span><br><span class="line">	val = (val &amp; <span class="number">0x3333333333333333</span>) + ((val &gt;&gt; <span class="number">2</span>) &amp; <span class="number">0x3333333333333333</span>)</span><br><span class="line">	<span class="comment">// 第1部分+第2部分，第3部分+第4部分，...第15部分+第16部分</span></span><br><span class="line">	val = (val &amp; <span class="number">0x0F0F0F0F0F0F0F0F</span>) + ((val &gt;&gt; <span class="number">4</span>) &amp; <span class="number">0x0F0F0F0F0F0F0F0F</span>)</span><br><span class="line">	<span class="comment">// 第1部分+第2部分，第3部分+第4部分，...第7部分+第8部分</span></span><br><span class="line">	val = (val &amp; <span class="number">0x00FF00FF00FF00FF</span>) + ((val &gt;&gt; <span class="number">8</span>) &amp; <span class="number">0x00FF00FF00FF00FF</span>)</span><br><span class="line">	<span class="comment">// 第1部分+第2部分，第3部分+第4部分</span></span><br><span class="line">	val = (val &amp; <span class="number">0x0000FFFF0000FFFF</span>) + ((val &gt;&gt; <span class="number">16</span>) &amp; <span class="number">0x0000FFFF0000FFFF</span>)</span><br><span class="line">	<span class="comment">// 第1部分+第2部分</span></span><br><span class="line">	val = (val &amp; <span class="number">0x00000000FFFFFFFF</span>) + ((val &gt;&gt; <span class="number">32</span>) &amp; <span class="number">0x00000000FFFFFFFF</span>)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 更为精简的操作</span></span><br><span class="line">	<span class="comment">//val -= (val &gt;&gt; 1) &amp; 0x5555555555555555</span></span><br><span class="line">	<span class="comment">//val = (val&gt;&gt;2)&amp;0x3333333333333333 + val&amp;0x3333333333333333</span></span><br><span class="line">	<span class="comment">//val += val &gt;&gt; 4</span></span><br><span class="line">	<span class="comment">//val &amp;= 0x0f0f0f0f0f0f0f0f</span></span><br><span class="line">	<span class="comment">//val *= 0x0101010101010101</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="type">int</span>(val)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
-</ul>
-    
-    <a class="article-more-a" href="/2022/06/29/algorithm-bitmap/#more">more >></a>
-    
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">algorithm</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2022/06/29/algorithm-bitmap/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/3/">Next &amp;raquo;</a>
@@ -1250,6 +1254,14 @@
   		本站访客数<span id="busuanzi_value_site_uv"></span>人
   	</span>
   
+  
+	<script src='https://unpkg.com/mermaid@9.0.0/dist/mermaid.min.js'></script>
+	<script>
+	  if (window.mermaid) {
+		mermaid.initialize({theme: "default "});
+	  }
+	</script>
+  
 </footer>
 
     </div>
@@ -1261,7 +1273,7 @@
 		isArchive: false,
 		isTag: false,
 		isCategory: false,
-		open_in_new: true,
+		open_in_new: false,
 		toc_hide_index: true,
 		root: "/",
 		innerArchive: true,

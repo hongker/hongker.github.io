@@ -45,9 +45,6 @@
   
 
   
-    
- 	  <script src="/lib/clickLove.js"></script>
-  
   
 
 
@@ -78,17 +75,17 @@
 		<nav class="header-menu">
 			<ul>
 			
-				<li><a href="/" target="_blank">主页</a></li>
+				<li><a href="/" >主页</a></li>
 			
-				<li><a href="/tags/golang" target="_blank">Golang</a></li>
+				<li><a href="/tags/golang" >Golang</a></li>
 			
-				<li><a href="/tags/micro-service" target="_blank">微服务</a></li>
+				<li><a href="/tags/micro-service" >微服务</a></li>
 			
-				<li><a href="/tags/kubernetes" target="_blank">K8S</a></li>
+				<li><a href="/tags/kubernetes" >K8S</a></li>
 			
-				<li><a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" target="_blank">设计模式</a></li>
+				<li><a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" >设计模式</a></li>
 			
-				<li><a href="/tags/algorithm" target="_blank">数据结构与算法</a></li>
+				<li><a href="/tags/algorithm" >数据结构与算法</a></li>
 			
 			</ul>
 		</nav>
@@ -111,13 +108,13 @@
 			<div class="social">
 				
 					
-						<a class="github" href="https://github.com/hongker" 
-												title="GitHub" target="_blank"><i class="icon-github"></i></a>
+						<a class="github" target="_blank" rel="noopener" href="https://github.com/hongker" 
+												title="GitHub" ><i class="icon-github"></i></a>
 					
 				
 					
 						<a class="mail" href="mailto:xiaok2013@live.com" 
-												title="Email" target="_blank"><i class="icon-mail"></i></a>
+												title="Email" ><i class="icon-mail"></i></a>
 					
 				
 			</div>
@@ -219,6 +216,141 @@
             
 
   
+    <article id="post-kubernetes-introduce" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2021/04/06/kubernetes-introduce/">kubernetes介绍与安装</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2021/04/06/kubernetes-introduce/" class="archive-article-date">
+        <time datetime="2021-04-06T12:00:33.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-04-06</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>本文作为kubernetes系列的开篇，主要介绍一些相关概念。</p>
+<h2 id="什么是kubernetes"><a href="#什么是kubernetes" class="headerlink" title="什么是kubernetes"></a>什么是kubernetes</h2><blockquote>
+<p>kubernetes，简称K8s。是一个开源的，用于管理云平台中多个主机上的容器化的应用，Kubernetes的目标是让部署容器化的应用简单并且高效（powerful）,Kubernetes提供了应用部署，规划，更新，维护的一种机制。</p>
+</blockquote>
+<p>在服务化时代，每个公司都会有很多个分散的项目，我们通过k8s来统一管理这些应用，不但可以提高服务的部署效率，还能提高服务的横向扩展能力。</p>
+<h2 id="k8s-amp-docker"><a href="#k8s-amp-docker" class="headerlink" title="k8s &amp; docker"></a>k8s &amp; docker</h2><ul>
+<li>docker: 应用容器引擎，作为目标程序的载体，可移植，达到运行环境一致性。</li>
+<li>k8s: 容器集群管理系统，实现容器集群的自动化部署，扩缩容，负载均衡等。</li>
+</ul>
+<p>在我看来,docker就像“出租车”，k8s就是“出租车管理公司”。</p>
+<h2 id="相关概念"><a href="#相关概念" class="headerlink" title="相关概念"></a>相关概念</h2><h3 id="Master"><a href="#Master" class="headerlink" title="Master"></a>Master</h3><p>集群控制节点。负责整个集群服务的的管理和控制。Mater节点上运行以下组件：</p>
+<ul>
+<li><p>kube-apiserver: http服务，对k8s中所有资源进行管理(增删改查)，是集群控制入口进程。kubectl是访问apiserver的客户端工具。</p>
+</li>
+<li><p>kube-control-manager: apiserver为对外开放的应用服务，与之相对的后台服务就是kube-control-manager,负责k8s里所有资源对象的控制。</p>
+</li>
+<li><p>kube-schedule: 资源调度器，负责调度pod到node节点上。</p>
+</li>
+<li><p>etcd: 存储各种资源的状态数据。</p>
+</li>
+</ul>
+<h3 id="Node"><a href="#Node" class="headerlink" title="Node"></a>Node</h3><p>除master节点外的其他机器节点。是集群的工作负载节点。Node节点上运行以下组件：</p>
+<ul>
+<li>kubelet: 负责pod对应的容器创建、启动、停止、资源监控等任务。</li>
+<li>kube-proxy: 实现service的通信与负载均衡功能。</li>
+<li>docker: 容器runtime。</li>
+</ul>
+<h3 id="Deployment"><a href="#Deployment" class="headerlink" title="Deployment"></a>Deployment</h3><p>当我们需要创建pod来运行应用的时候，不是直接创建Pod,而是创建一个Deployment，用它负责创建和更新应用。可以理解为pod的”管家”。</p>
+<h3 id="Service"><a href="#Service" class="headerlink" title="Service"></a>Service</h3><p>因为pod可能会不停的创建和销毁，其IP也会随之变化，我们想要在外部固定的访问pod上运行的应用，就需要service来暴露pod里的应用。</p>
+<p>service定义了一组pod的逻辑集合和访问策略，不管内部的pod如何变化，我们只要保证service的访问方式不变，其内部会通过服务注册&#x2F;发现来定位到pod应用。</p>
+<h3 id="Pod"><a href="#Pod" class="headerlink" title="Pod"></a>Pod</h3><ul>
+<li>在k8s里最小的逻辑运行单元，简单的说就是容器集合。</li>
+<li>相同pod里运行的多个容器，共享uts、net、ipc空间等。</li>
+</ul>
+<h2 id="安装k8s集群环境"><a href="#安装k8s集群环境" class="headerlink" title="安装k8s集群环境"></a>安装k8s集群环境</h2><p>通过<code>kind</code>安装k8s cluster,下载：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.10.0/kind-linux-amd64</span><br><span class="line">chmod +x ./kind</span><br><span class="line">mv ./kind /usr/bin/kind</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>创建集群</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kind create cluster</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查看集群信息</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl cluster-info</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查看节点</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get nodes</span><br></pre></td></tr></table></figure></li>
+<li><p>删除集群</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kind delete cluster</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>k8s环境已准备就绪。下一章将介绍<code>如何用k8s部署go的web应用</code>，敬请期待！</p>
+
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">kubernetes</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2021/04/06/kubernetes-introduce/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-golang-di" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -227,8 +359,8 @@
   
     <h1 itemprop="name">
 	
-	  <a class="article-title" href="/2021/03/31/golang-di/" target="_blank">Golang代码优化25-依赖注入</a>
-  
+	  <a class="article-title" href="/2021/03/31/golang-di/">Golang代码优化25-依赖注入</a>
+	
     </h1>
   
 
@@ -332,8 +464,8 @@
   
     <h1 itemprop="name">
 	
-	  <a class="article-title" href="/2021/03/24/golang-mongodb/" target="_blank">Golang24-mongodb客户端</a>
-  
+	  <a class="article-title" href="/2021/03/24/golang-mongodb/">Golang24-mongodb客户端</a>
+	
     </h1>
   
 
@@ -422,8 +554,8 @@
   
     <h1 itemprop="name">
 	
-	  <a class="article-title" href="/2021/03/22/service-mongodb/" target="_blank">服务化02-mongodb集群</a>
-  
+	  <a class="article-title" href="/2021/03/22/service-mongodb/">服务化02-mongodb集群</a>
+	
     </h1>
   
 
@@ -516,8 +648,8 @@
   
     <h1 itemprop="name">
 	
-	  <a class="article-title" href="/2021/03/21/golang-elasticsearch/" target="_blank">Golang23-操作Elasticsearch</a>
-  
+	  <a class="article-title" href="/2021/03/21/golang-elasticsearch/">Golang23-操作Elasticsearch</a>
+	
     </h1>
   
 
@@ -612,8 +744,8 @@
   
     <h1 itemprop="name">
 	
-	  <a class="article-title" href="/2021/03/21/service-elasticsearch/" target="_blank">服务化01-Elasticsearch集群</a>
-  
+	  <a class="article-title" href="/2021/03/21/service-elasticsearch/">服务化01-Elasticsearch集群</a>
+	
     </h1>
   
 
@@ -732,8 +864,8 @@
   
     <h1 itemprop="name">
 	
-	  <a class="article-title" href="/2021/02/19/golang-rbac-watcher/" target="_blank">Golang代码优化22-RBAC分布式同步</a>
-  
+	  <a class="article-title" href="/2021/02/19/golang-rbac-watcher/">Golang代码优化22-RBAC分布式同步</a>
+	
     </h1>
   
 
@@ -831,8 +963,8 @@
   
     <h1 itemprop="name">
 	
-	  <a class="article-title" href="/2021/02/18/golang-limiter/" target="_blank">Golang代码优化21-限流器(Limiter)</a>
-  
+	  <a class="article-title" href="/2021/02/18/golang-limiter/">Golang代码优化21-限流器(Limiter)</a>
+	
     </h1>
   
 
@@ -926,8 +1058,8 @@
   
     <h1 itemprop="name">
 	
-	  <a class="article-title" href="/2021/02/18/golang-singleflight/" target="_blank">Golang代码优化20-通过SingleFlight防止缓存击穿</a>
-  
+	  <a class="article-title" href="/2021/02/18/golang-singleflight/">Golang代码优化20-通过SingleFlight防止缓存击穿</a>
+	
     </h1>
   
 
@@ -1024,8 +1156,8 @@
   
     <h1 itemprop="name">
 	
-	  <a class="article-title" href="/2020/08/04/algorithm-set/" target="_blank">Go数据结构与算法系列(02)-集合</a>
-  
+	  <a class="article-title" href="/2020/08/04/algorithm-set/">Go数据结构与算法系列(02)-集合</a>
+	
     </h1>
   
 
@@ -1121,104 +1253,6 @@
 
 
   
-    <article id="post-algorithm-queue" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2020/07/28/algorithm-queue/" target="_blank">Go数据结构与算法系列(03)-队列</a>
-  
-    </h1>
-  
-
-
-  
-  
-<a href="/2020/07/28/algorithm-queue/" class="archive-article-date">
-        <time datetime="2020-07-28T06:41:59.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-28</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>本文介绍在golang里如何实现队列得数据结构</p>
-<h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>队列是一种特殊的线性表，特殊之处在于它只允许在表的前端（front）进行删除操作，而在表的后端（rear）进行插入操作，和栈一样，队列是一种操作受限制的线性表。进行插入操作的端称为队尾，进行删除操作的端称为队头。队列中没有元素时，称为空队列。</p>
-<h2 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h2><ul>
-<li>入列<br>从尾部将元素加入到队列里。</li>
-<li>出列<br>从队列头部获取元素。</li>
-<li>查看长度<br>获取队列存储的元素个数。</li>
-<li>清空队列<br>将队列里的数据清空。</li>
-</ul>
-<h2 id="Demo"><a href="#Demo" class="headerlink" title="Demo"></a>Demo</h2><ul>
-<li>定义Queue接口<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Queue 队列</span></span><br><span class="line"><span class="keyword">type</span> Queue <span class="keyword">interface</span> &#123;</span><br><span class="line">	<span class="comment">// Push 入列</span></span><br><span class="line">	Push(items ...<span class="keyword">interface</span>&#123;&#125;)</span><br><span class="line">	<span class="comment">// Pop 出列</span></span><br><span class="line">	Pop() (<span class="keyword">interface</span>&#123;&#125;)</span><br><span class="line">	<span class="comment">// MPop 批量出列</span></span><br><span class="line">	MPop(n <span class="type">int</span>) ([]<span class="keyword">interface</span>&#123;&#125;)</span><br><span class="line">	<span class="comment">// Length 长度</span></span><br><span class="line">	Length() <span class="type">int</span></span><br><span class="line">	<span class="comment">// Clear 清空</span></span><br><span class="line">	Clear()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
-</ul>
-    
-    <a class="article-more-a" href="/2020/07/28/algorithm-queue/#more">more >></a>
-    
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">algorithm</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2020/07/28/algorithm-queue/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/3/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/5/">Next &amp;raquo;</a>
@@ -1257,6 +1291,14 @@
   		本站访客数<span id="busuanzi_value_site_uv"></span>人
   	</span>
   
+  
+	<script src='https://unpkg.com/mermaid@9.0.0/dist/mermaid.min.js'></script>
+	<script>
+	  if (window.mermaid) {
+		mermaid.initialize({theme: "default "});
+	  }
+	</script>
+  
 </footer>
 
     </div>
@@ -1268,7 +1310,7 @@
 		isArchive: false,
 		isTag: false,
 		isCategory: false,
-		open_in_new: true,
+		open_in_new: false,
 		toc_hide_index: true,
 		root: "/",
 		innerArchive: true,
