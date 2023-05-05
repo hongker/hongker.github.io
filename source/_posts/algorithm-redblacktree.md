@@ -19,7 +19,18 @@ tags: algorithm
 
 红黑树的具体实现可以使用旋转操作，向上旋转、向下旋转、左旋等操作来保证树的平衡状态。
 
+
 ## 实现
+```mermaid
+classDiagram
+class RedBlackTree:::styleClass {
+        -root *node // 头节点
+        +Put(key int, val any) // 写入数据
+        +Get(key int) any // 获取数据
+        +Delete(key int) // 删除数据
+    }
+```
+
 以下是golang版的红黑树实现代码：
 <!--more-->
 
