@@ -968,6 +968,11 @@ body {
     line-height: 1em;
     margin-bottom: 1em
 }
+.styleClass > rect {
+    fill: #ff0000;
+    stroke: #ffff00;
+    stroke-width: 4px;
+  }
 
 .article-entry .highlight figcaption:after,.article-entry .highlight figcaption:before {
     content: "";

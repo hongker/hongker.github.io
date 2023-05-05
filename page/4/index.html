@@ -216,6 +216,204 @@
             
 
   
+    <article id="post-golang-websocket-epoll" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2021/04/22/golang-websocket-epoll/">Golang(27)-websocket进阶</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2021/04/22/golang-websocket-epoll/" class="archive-article-date">
+        <time datetime="2021-04-22T13:14:05.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-04-22</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>之前有简单的介绍过<code>websocket</code>的基本用法，本文将介绍在golang里如何处理大量websocket连接。</p>
+<h2 id="初阶"><a href="#初阶" class="headerlink" title="初阶"></a>初阶</h2><p>现在有一个即时通讯的需求，我们实现一个简单的websocket服务如下所示：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;github.com/gorilla/websocket&quot;</span></span><br><span class="line">	<span class="string">&quot;log&quot;</span></span><br><span class="line">	<span class="string">&quot;net/http&quot;</span></span><br><span class="line">)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	http.ListenAndServe(<span class="string">&quot;:8085&quot;</span>, http.HandlerFunc(<span class="function"><span class="keyword">func</span><span class="params">(w http.ResponseWriter, r *http.Request)</span></span> &#123;</span><br><span class="line">		<span class="comment">// 升级为websocket连接</span></span><br><span class="line">		conn, err := NewWebsocketConnection(w, r)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			http.NotFound(w, r)</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123; <span class="comment">// 开启一个协程去处理连接</span></span><br><span class="line">			<span class="keyword">defer</span> conn.Close() <span class="comment">// 连接结束时需要关闭</span></span><br><span class="line">			<span class="keyword">for</span> &#123;</span><br><span class="line">				_, msg, err := conn.ReadMessage() <span class="comment">// 接受消息</span></span><br><span class="line">				<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">					log.Println(<span class="string">&quot;unable to read message:&quot;</span>, err.Error())</span><br><span class="line">					<span class="keyword">return</span></span><br><span class="line">				&#125;</span><br><span class="line">				<span class="comment">// 向客户端回话,或者其他业务逻辑</span></span><br><span class="line">				reply := fmt.Sprintf(<span class="string">&quot;received:%s&quot;</span>, <span class="type">string</span>(msg))</span><br><span class="line">				<span class="keyword">if</span> err := conn.WriteMessage(websocket.TextMessage, []<span class="type">byte</span>(reply)); err != <span class="literal">nil</span> &#123;</span><br><span class="line">					log.Printf(<span class="string">&quot;unable to send message&quot;</span>)</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;()</span><br><span class="line">	&#125;))</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> u = websocket.Upgrader&#123;CheckOrigin: <span class="function"><span class="keyword">func</span><span class="params">(r *http.Request)</span></span> <span class="type">bool</span> &#123; <span class="keyword">return</span> <span class="literal">true</span> &#125;&#125; <span class="comment">// use default options</span></span><br><span class="line"><span class="comment">// WebsocketConn return web socket connection</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewWebsocketConnection</span><span class="params">(w http.ResponseWriter, r *http.Request)</span></span> (*websocket.Conn, <span class="type">error</span>) &#123;</span><br><span class="line">	<span class="keyword">return</span> u.Upgrade(w, r, <span class="literal">nil</span>)</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过<code>wscat -c localhost:8085</code>连接到websocket,并发送<code>hello</code>和<code>123</code>,得到测试结果如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">&gt; hello</span><br><span class="line">&lt; received:hello</span><br><span class="line">&gt; 123</span><br><span class="line">&lt; received:123</span><br></pre></td></tr></table></figure>
+
+<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><blockquote>
+<p>如果我们的服务需要面向100w个用户时，会发生什么情况？</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1.每创建一个websocket连接，按照以上的实现方式，我们就需要创建一个goroutine来接收客户端的信息。一个goroutine大概需要2~8kb的内存</span><br><span class="line">2.如果是同时有100万个连接，假设每个goroutine占用4kb内存，那么内存消耗大概在：4kb*1000000=4G。</span><br></pre></td></tr></table></figure>
+
+<p>光是保持连接，不做任何处理就已经消耗了4G的内存，还是挺恐怖的，所以下面开始介绍用epoll模型来解决这个问题。</p>
+    
+    <a class="article-more-a" href="/2021/04/22/golang-websocket-epoll/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2021/04/22/golang-websocket-epoll/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-golang-mem" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2021/04/11/golang-mem/">Golang26-内存模型</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2021/04/11/golang-mem/" class="archive-article-date">
+        <time datetime="2021-04-11T15:04:46.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-04-11</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>本文介绍Golang的内存模型相关知识。</p>
+<h2 id="什么是go的内存模型"><a href="#什么是go的内存模型" class="headerlink" title="什么是go的内存模型"></a>什么是go的内存模型</h2><blockquote>
+<p>指定了一系列条件，在这些条件下，可以保证在协程中对变量的读取操作可以观察到其他协程对同一变量写操作的结果，这就是go内存模型。</p>
+</blockquote>
+<h2 id="为什么需要这些条件？"><a href="#为什么需要这些条件？" class="headerlink" title="为什么需要这些条件？"></a>为什么需要这些条件？</h2><p>因为编译器无法保证指令执行顺序与程序书写顺序一致。   </p>
+<p>如下示例：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    i := <span class="number">5</span></span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        i = <span class="number">10</span></span><br><span class="line">    &#125;()</span><br><span class="line">    <span class="keyword">for</span> j := <span class="number">0</span>;j&lt;<span class="number">100</span>;j++ &#123;</span><br><span class="line">        fmt.Println(i)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>多运行几次，会发现结果可能不同，但可以发现，部分<code>Println</code>打印的<code>i</code>变量依然是<code>5</code>，说明未能立观察到协程对<code>i</code>变量的写操作。</p>
+<p>所以我们为了保证协程间的变量读取的可观察，就需要建立<code>Happen Before</code>关系的同步事件。也就是内存模型设定的<code>条件</code>。</p>
+<h2 id="Happen-Before"><a href="#Happen-Before" class="headerlink" title="Happen Before"></a>Happen Before</h2><p>以下几种方式，可以建立<code>Happen Before</code>关系的同步事件:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1.init函数</span><br><span class="line">2.创建/销毁goroutine</span><br><span class="line">3.channel</span><br><span class="line">4.锁</span><br><span class="line">5.Once</span><br></pre></td></tr></table></figure>
+    
+    <a class="article-more-a" href="/2021/04/11/golang-mem/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2021/04/11/golang-mem/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-kubernetes-introduce" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1050,212 +1248,9 @@
 
 
   
-    <article id="post-golang-singleflight" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2021/02/18/golang-singleflight/">Golang代码优化20-通过SingleFlight防止缓存击穿</a>
-	
-    </h1>
-  
-
-
-  
-  
-<a href="/2021/02/18/golang-singleflight/" class="archive-article-date">
-        <time datetime="2021-02-18T02:57:09.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-02-18</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>在高并发场景中，我们最普遍的方案是采用高性能的缓存。在缓存使用过程中，需要注意<code>缓存穿透</code>、<code>缓存雪崩</code>、<code>缓存击穿</code>。以下介绍如何通过<code>singleflight</code>防止<code>缓存击穿</code>。</p>
-<h2 id="什么是缓存击穿"><a href="#什么是缓存击穿" class="headerlink" title="什么是缓存击穿"></a>什么是缓存击穿</h2><blockquote>
-<p>缓存击穿是指缓存中没有但数据库中有的数据（一般是缓存时间到期），这时由于并发用户特别多，同时读缓存没读到数据，又同时去数据库去取数据，引起数据库压力瞬间增大，造成过大压力。</p>
-</blockquote>
-<h2 id="SingleFlight"><a href="#SingleFlight" class="headerlink" title="SingleFlight"></a>SingleFlight</h2><p>在多个并发请求对一个失效的key进行源数据获取时，只让其中一个得到执行，其余阻塞等待到执行的那个请求完成后，将结果传递给阻塞的其他请求达到防止击穿的效果。</p>
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go get golang.org/x/sync/singleflight</span><br></pre></td></tr></table></figure>
-
-<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;log&quot;</span></span><br><span class="line">	<span class="string">&quot;time&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;golang.org/x/sync/singleflight&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> singleHandle singleflight.Group</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ &#123; <span class="comment">// 模拟10个并发</span></span><br><span class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">			fmt.Println(GetName(<span class="string">&quot;username&quot;</span>))</span><br><span class="line">		&#125;()</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 等待协程执行结束</span></span><br><span class="line">	time.Sleep(<span class="number">3</span> * time.Second)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// GetName 获取名称</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">GetName</span><span class="params">(cacheKey <span class="type">string</span>)</span></span> <span class="type">string</span> &#123;</span><br><span class="line">	result, _, _ := singleHandle.Do(cacheKey, <span class="function"><span class="keyword">func</span><span class="params">()</span></span> (ret <span class="keyword">interface</span>&#123;&#125;, err <span class="type">error</span>) &#123;</span><br><span class="line">		log.Printf(<span class="string">&quot;getting %s from database\n&quot;</span>, cacheKey)</span><br><span class="line">		log.Printf(<span class="string">&quot;setting %s in cache\n&quot;</span>, cacheKey)</span><br><span class="line">		<span class="keyword">return</span> <span class="string">&quot;hongker&quot;</span>, <span class="literal">nil</span></span><br><span class="line">	&#125;)</span><br><span class="line">	<span class="keyword">return</span> result.(<span class="type">string</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>结果<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">2021/02/18 14:26:12 getting username from database</span><br><span class="line">2021/02/18 14:26:12 setting username in cache</span><br><span class="line">hongker</span><br><span class="line">hongker</span><br><span class="line">hongker</span><br><span class="line">hongker</span><br><span class="line">hongker</span><br><span class="line">hongker</span><br><span class="line">hongker</span><br><span class="line">hongker</span><br><span class="line">hongker</span><br><span class="line">hongker</span><br></pre></td></tr></table></figure>
-只有一个协程执行从数据库中获取并设置缓存的操作，其他协程则是在等待获取缓存。避免缓存击穿。</li>
-</ul>
-
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2021/02/18/golang-singleflight/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-algorithm-set" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2020/08/04/algorithm-set/">Go数据结构与算法系列(02)-集合</a>
-	
-    </h1>
-  
-
-
-  
-  
-<a href="/2020/08/04/algorithm-set/" class="archive-article-date">
-        <time datetime="2020-08-04T14:11:46.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-08-04</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>本篇文章主要介绍golang里集合的实现思路。</p>
-<h2 id="什么是集合？"><a href="#什么是集合？" class="headerlink" title="什么是集合？"></a>什么是集合？</h2><blockquote>
-<p>集合通常是由一组无序的, 不能重复的元素构成</p>
-</blockquote>
-<h2 id="功能"><a href="#功能" class="headerlink" title="功能"></a>功能</h2><ul>
-<li>添加元素</li>
-<li>删除元素</li>
-<li>获取集合的元素数量</li>
-<li>检查集合是否包含某元素</li>
-<li>清空集合</li>
-<li>判断集合是否为空</li>
-<li>集合转数组</li>
-<li>复制</li>
-</ul>
-<p>接口设计如下：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Set <span class="keyword">interface</span> &#123;</span><br><span class="line">	<span class="comment">// 添加元素</span></span><br><span class="line">	Add(items ...<span class="keyword">interface</span>&#123;&#125;)</span><br><span class="line">	<span class="comment">// 包含</span></span><br><span class="line">	Contain(item <span class="keyword">interface</span>&#123;&#125;) <span class="type">bool</span></span><br><span class="line">	<span class="comment">// 删除</span></span><br><span class="line">	Remove(item <span class="keyword">interface</span>&#123;&#125;)</span><br><span class="line">	<span class="comment">// 集合大小</span></span><br><span class="line">	Size() <span class="type">int</span></span><br><span class="line">	<span class="comment">// 清空</span></span><br><span class="line">	Clear()</span><br><span class="line">	<span class="comment">// 判断是否为空</span></span><br><span class="line">	Empty() <span class="type">bool</span></span><br><span class="line">	<span class="comment">// 创建副本</span></span><br><span class="line">	Duplicate() Set</span><br><span class="line">	<span class="comment">// 数组</span></span><br><span class="line">	ToSlice() []<span class="keyword">interface</span>&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h2>
-    
-    <a class="article-more-a" href="/2020/08/04/algorithm-set/#more">more >></a>
-    
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">algorithm</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2020/08/04/algorithm-set/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/3/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/5/">Next &amp;raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/3/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/5/">Next &amp;raquo;</a>
     </nav>
   
 

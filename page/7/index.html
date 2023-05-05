@@ -216,6 +216,196 @@
             
 
   
+    <article id="post-golang-lock" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2020/03/31/golang-lock/">Golang代码优化05-锁</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2020/03/31/golang-lock/" class="archive-article-date">
+        <time datetime="2020-03-31T05:52:03.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-03-31</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>介绍在项目开发中，经常用到到保证数据安全的锁的使用。</p>
+<h2 id="sync-Mutex-互斥锁"><a href="#sync-Mutex-互斥锁" class="headerlink" title="sync.Mutex 互斥锁"></a>sync.Mutex 互斥锁</h2><ul>
+<li>demo<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Item <span class="keyword">struct</span> &#123;</span><br><span class="line">	mu sync.Mutex</span><br><span class="line">	number <span class="type">int</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// NewItem</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewItem</span><span class="params">()</span></span> *Item &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;Item&#123;</span><br><span class="line">		mu:     sync.Mutex&#123;&#125;,</span><br><span class="line">		number: <span class="number">0</span>,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// SetNumber</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(item *Item)</span></span> SetNumber(num <span class="type">int</span>) &#123;</span><br><span class="line">	item.mu.Lock()</span><br><span class="line">	<span class="keyword">defer</span> item.mu.Unlock()</span><br><span class="line">	item.number = num</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Number</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(item *Item)</span></span> Number() <span class="type">int</span> &#123;</span><br><span class="line">	item.mu.Lock()</span><br><span class="line">	<span class="keyword">defer</span> item.mu.Unlock()</span><br><span class="line">	<span class="keyword">return</span> item.number</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+通过mu互斥锁保证写入数据和读取数据都是线程安全的。如果不用锁，在多个协程里执行SetNumber()容易导致获取的数据和预期不一致</li>
+</ul>
+<h2 id="RWMutex-读写锁"><a href="#RWMutex-读写锁" class="headerlink" title="RWMutex 读写锁"></a>RWMutex 读写锁</h2><p>在读多写少的场景中，可以优先使用读写锁RWMutex。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;sync&quot;</span></span><br><span class="line">    <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line"></span><br><span class="line">    u := NewUser()</span><br><span class="line">    <span class="comment">// 通过协程并发读取，这里使用读锁，比互斥锁效率更高</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ &#123;</span><br><span class="line">        wg.Add(<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">            <span class="keyword">defer</span> wg.Done()</span><br><span class="line">            fmt.Println(<span class="string">&quot;Get Age:&quot;</span>, u.GetAge(),time.Now().Second())</span><br><span class="line">        &#125;()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 激活一个申请写锁的goroutine</span></span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        wg.Add(<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">defer</span> wg.Done()</span><br><span class="line">        u.ChangeAge(<span class="number">10</span>)</span><br><span class="line">    &#125;()</span><br><span class="line">    <span class="comment">// 阻塞，直到所有wg.Done</span></span><br><span class="line">    wg.Wait()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// NewUser return user instance</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewUser</span><span class="params">()</span></span> *U &#123;</span><br><span class="line">    <span class="keyword">return</span> &amp;U&#123;</span><br><span class="line">        rwm: sync.RWMutex&#123;&#125;,</span><br><span class="line">        Age: <span class="number">0</span>,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// U user</span></span><br><span class="line"><span class="keyword">type</span> U <span class="keyword">struct</span> &#123;</span><br><span class="line">    rwm sync.RWMutex</span><br><span class="line">    Age <span class="type">int</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// GetAge</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(u *U)</span></span> GetAge() <span class="type">int</span> &#123;</span><br><span class="line">    u.rwm.RLock()</span><br><span class="line">    <span class="keyword">defer</span> u.rwm.RUnlock()</span><br><span class="line">    <span class="keyword">return</span> u.Age</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// ChangeAge</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(u *U)</span></span> ChangeAge(age <span class="type">int</span>) &#123;</span><br><span class="line">    u.rwm.Lock()</span><br><span class="line">    <span class="keyword">defer</span> u.rwm.Unlock()</span><br><span class="line">    u.Age = age</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    
+    <a class="article-more-a" href="/2020/03/31/golang-lock/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2020/03/31/golang-lock/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-http-response" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2020/03/31/http-response/">Golang代码优化04-Http响应处理</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2020/03/31/http-response/" class="archive-article-date">
+        <time datetime="2020-03-31T04:28:14.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-03-31</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>介绍读取http的response内容。</p>
+<h2 id="读取方式"><a href="#读取方式" class="headerlink" title="读取方式"></a>读取方式</h2><ul>
+<li><p>1.使用<code>ioutil.ReadAll()</code>读取response</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span> <span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="comment">// send get request</span></span><br><span class="line">    resp, err := http.Get(<span class="string">&quot;https://api.ipify.org/?format=json&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Println(err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// defer must execute after check error,otherwise will panic when resp is nil</span></span><br><span class="line">    <span class="keyword">defer</span> resp.Body.Close()</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// read body</span></span><br><span class="line">	body, err := ioutil.ReadAll(resp.Body)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Println(err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Println(<span class="type">string</span>(body))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>但是<code>ioutil.ReadAll()</code>方法有弊端,有时候却会导致一些性能问题。比如http大量请求时轻则导致内存浪费严重，重则导致内存泄漏影响业务。</p>
+</li>
+<li><p>2.使用buffer读取</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span> <span class="params">()</span></span> &#123;</span><br><span class="line">	resp, err := http.Get(<span class="string">&quot;https://api.ipify.org/?format=json&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Println(err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">    <span class="keyword">defer</span> resp.Body.Close()</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// new buffer</span></span><br><span class="line">	buffer := bytes.NewBuffer(<span class="built_in">make</span>([]<span class="type">byte</span>, <span class="number">4056</span>))</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> _, err := io.Copy(buffer, resp.Body);err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Println(err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Println(buffer.String())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+    
+    <a class="article-more-a" href="/2020/03/31/http-response/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2020/03/31/http-response/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-channel" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1090,91 +1280,9 @@
 
 
   
-    <article id="post-target" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2018/12/10/target/">目标</a>
-	
-    </h1>
-  
-
-
-  
-  
-<a href="/2018/12/10/target/" class="archive-article-date">
-        <time datetime="2018-12-10T14:09:31.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-12-10</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>从今天开始写博客啦，坚持写文章，日积月累，我相信必有收获。<br>写作内容有以下几个方面:</p>
-<h3 id="区块链"><a href="#区块链" class="headerlink" title="区块链"></a>区块链</h3><p>我的工作主要是研究区块链技术，前期文章围绕这个技术点来开展。主要介绍开源项目Hyperledger Fabric部署区块链网络与其相关应用开发。</p>
-<h3 id="Golang"><a href="#Golang" class="headerlink" title="Golang"></a>Golang</h3><p>写法有点另类的开发语言，但是很强大！</p>
-<h3 id="Linux"><a href="#Linux" class="headerlink" title="Linux"></a>Linux</h3><p>我还是linux爱好者，平时办公的系统是用的Ubuntu 18.04，也会偶尔分享一些有用又有颜值的软件。</p>
-<h3 id="Docker"><a href="#Docker" class="headerlink" title="Docker"></a>Docker</h3><p>现在的互联网已经离不开微服务的架构设计，而Docker就是实现微服务化的利器，偶尔也会发布一些Docker相关文章。</p>
-<h3 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h3><p>平时用到的数据库主要是Mysql,MongoDb,Redis，偶尔也会写些相关内容。</p>
-<h3 id="PHP"><a href="#PHP" class="headerlink" title="PHP"></a>PHP</h3><p>人家说写PHP的代码质量低，为什么会有这个现象？无巧不成书，确实PHP方便简单，写着顺手，面向过程写多了，随着时间与代码行数的增加，代码自然而然就复杂难懂。所以我想通过PHP去探讨设计模式，提升PHP代码的质量。</p>
-<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><p>生命不息，学习不止！欢迎大家积极参与讨论。</p>
-
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2018/12/10/target/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/6/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span>
+      <a class="extend prev" rel="prev" href="/page/6/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/8/">Next &amp;raquo;</a>
     </nav>
   
 

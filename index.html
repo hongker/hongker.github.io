@@ -216,6 +216,197 @@
             
 
   
+    <article id="post-algorithm-listpack" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2023/05/05/algorithm-listpack/">数据结构与算法(17)- ListPack</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2023/05/05/algorithm-listpack/" class="archive-article-date">
+        <time datetime="2023-05-05T01:42:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-05-05</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><blockquote>
+<p>Redis 的 Listpack 是一种专门用于实现底层的 list 数据结构的紧凑型二进制数据格式，通过优化内存占用和 CPU 执行效率等方面来提高列表操作的性能和吞吐量。通常情况下，Listpack 会在 Redis 的列表操作中与 Quicklist 和 Ziplist 进行混合组合使用。</p>
+</blockquote>
+<p>Listpack 的设计主要有以下几个方面的考虑：</p>
+<ul>
+<li>物理上受限。一次仅能访问固定大小的内存块，因此需要有效地优化内存占用。</li>
+<li>高效归档。缓慢和大量访问时需要很快地进行归档和截断，因此需要有效地支持对跨越多块或长时间未被访问的元素的删除和收缩操作。</li>
+<li>具有随机访问特性。允许针对需要随机访问的元素（如非常大的列表）使用块缓存、预取依赖等高级缓存算法以支持快速随机访问功能而不会影响整体性能。</li>
+</ul>
+<p>Listpack 将列表中所有字符串类型的值编码成一种紧凑的、不可变的字节数组并按顺序连接起来，同时还维护了一份总长度、最后一个元素的偏移量、已使用字节数和尾部空白（tail free）区域的首地址等元数据信息。为了优化内存使用和分配，Listpack 还使用了一种连续型内存结构，其中每个块包含至多 64 个字节并允许使用支持延迟分配的技术。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">总之，Redis 的 Listpack 是一种紧凑、高效、可扩展的二进制格式，通过设计精巧的开销管理和随机访问功能来提高 Redis 列表操作性能和灵活性。</span><br></pre></td></tr></table></figure>
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">algorithm</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2023/05/05/algorithm-listpack/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-algorithm-quicklist" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2023/05/05/algorithm-quicklist/">数据结构与算法(17)- QuickList</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2023/05/05/algorithm-quicklist/" class="archive-article-date">
+        <time datetime="2023-05-05T01:35:12.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-05-05</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <h2 id="什么是QuickList"><a href="#什么是QuickList" class="headerlink" title="什么是QuickList"></a>什么是QuickList</h2><blockquote>
+<p>Quicklist 是 Redis 列表（List）数据结构的一种内部优化方式。其采用链址法（Chaining）实现，可以将多个列表分成多个节点依次存储，从而减小单个列表占用空间的大小。</p>
+</blockquote>
+<p>Quicklist 内部由以下两部分组成：</p>
+<ul>
+<li>ziplist 节点：使用 ziplist 来压缩小于等于 ziplist-max-entries 个元素的列表。</li>
+<li>linkedlist 节点：使用 linkedlist 特殊数据结构来存储大于 ziplist-max-entries 个元素的列表。</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps: ziplist 是 Redis 的另一种数据结构，类似于 listpack，但它是被设计用来存储非常短的列表。相对于 ListPack，它采取更加紧凑、轻量化的存储方式。</span><br></pre></td></tr></table></figure>
+
+<p>Quicklist 的优势在于当列表大小较小时，使用 ziplist 可以有效地减小单个列表占用的空间。而在列表大小较大时，使用 linkedlist 可以避免频繁进行扩容操作，提高整体性能。需要注意的是，在写入和删除操作频繁的情况下，可能会导致整个 Quicklist 结构出现内存碎片，导致性能下降。</p>
+
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">algorithm</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2023/05/05/algorithm-quicklist/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-algorithm-redblacktree" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -258,7 +449,15 @@
 </ul>
 <p>这些约束条件确保了红黑树在插入和删除结点时始终保持平衡，即每个结点到叶子结点的路径长度都是大致相同的，从而保证了红黑树的查找、插入和删除操作的时间复杂度为O(logn)。另外，由于红黑树内部所有的插入、删除操作都需要保证其满足着上述特点，所以相比于其他平衡树（如AVL树），红黑树的实现难度较低，而且性能表现更为稳定，因此应用广泛。</p>
 <p>红黑树的具体实现可以使用旋转操作，向上旋转、向下旋转、左旋等操作来保证树的平衡状态。</p>
-<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>以下是golang版的红黑树实现代码：</p>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><pre class="mermaid">classDiagram
+class RedBlackTree:::styleClass {
+        -root *node // 头节点
+        +Put(key int, val any) // 写入数据
+        +Get(key int) any // 获取数据
+        +Delete(key int) // 删除数据
+    }</pre>
+
+<p>以下是golang版的红黑树实现代码：</p>
     
     <a class="article-more-a" href="/2023/04/25/algorithm-redblacktree/#more">more >></a>
     
@@ -1118,212 +1317,9 @@
 
 
   
-    <article id="post-golang-tcp-framework" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2022/11/26/golang-tcp-framework/">Golang系列(33)-高性能Socket框架的设计</a>
-	
-    </h1>
-  
-
-
-  
-  
-<a href="/2022/11/26/golang-tcp-framework/" class="archive-article-date">
-        <time datetime="2022-11-26T06:46:08.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-11-26</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>前面介绍了Epoll,Reactor等等，本文主要是介绍高性能Socket框架的设计思路以及各个模块的调用时序。</p>
-<p>更多请参考：我的自研网络框架 <a target="_blank" rel="noopener" href="https://github.com/ebar-go/znet">znet</a>，欢迎Star与提Issue。</p>
-<h2 id="整体设计"><a href="#整体设计" class="headerlink" title="整体设计"></a>整体设计</h2><p>想要达到高性能的目标，首先必须在整体方面有良好的设计。</p>
-<h3 id="模块设计"><a href="#模块设计" class="headerlink" title="模块设计"></a>模块设计</h3><p><img src="http://assets.processon.com/chart_image/62b3d00e637689074ac74fb3.png?1" alt="Framework"></p>
-<ul>
-<li>Network：Socket服务的总控，负责初始化和管理各个子模块。</li>
-<li>Acceptor: 连接接收模块，负责与客户端建立连接。</li>
-<li>Reactor: 事件调度主模块，负责监听活跃连接以及注册回调事件(OnOpen&#x2F;OnClose&#x2F;OnMessage&#x2F;OnError)。</li>
-<li>SubReactor: 事件调度子模块，负责管理连接，以及执行新消息回调事件。</li>
-<li>Thread: 多线程事件处理模块，利用协程池并发处理客户端请求，包括读取、解包、处理逻辑、打包、发送数据等操作。</li>
-<li>Connection: 客户端连接抽象对象，同时支持TCP&#x2F;WebSocket协议的连接。</li>
-<li>Context: 请求上下文对象，负责携带客户端请求数据。</li>
-<li>Engine: 请求处理引擎，负责执行Context。采用责任链的设计模式，提供注入中间件的使用方式。</li>
-<li>Router：路由模块，细化请求处理回调事件，允许按照Action来注入处理客户端请求的Handler。</li>
-</ul>
-    
-    <a class="article-more-a" href="/2022/11/26/golang-tcp-framework/#more">more >></a>
-    
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2022/11/26/golang-tcp-framework/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-golang-tcp-reactor-acceptor" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2022/11/16/golang-tcp-reactor-acceptor/">Golang系列(32)-通过reactor模型监听连接</a>
-	
-    </h1>
-  
-
-
-  
-  
-<a href="/2022/11/16/golang-tcp-reactor-acceptor/" class="archive-article-date">
-        <time datetime="2022-11-16T10:38:10.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-11-16</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>上一篇文章介绍了reactor模型，本文介绍如何通过reactor模型监听TCP连接</p>
-<p>更多请参考：我的自研网络框架 <a target="_blank" rel="noopener" href="https://github.com/ebar-go/znet">znet</a>，欢迎Star与提Issue。</p>
-<h2 id="Reactor实现方案"><a href="#Reactor实现方案" class="headerlink" title="Reactor实现方案"></a>Reactor实现方案</h2><ul>
-<li>方案一：单进程&#x2F;线程，启动单个Reactor，单个Acceptor。不用考虑进程间通信以及数据同步的问题,无法充分利用多核CPU。处理业务逻辑的时间不能太长，否则会延迟响应，所以不适用于计算机密集型的场景。</li>
-<li>方案二：单进程&#x2F;多线程，启动单个Reactor,多个Acceptor。解决方案一的问题无法利用多核CPU的问题。但是它依然只有一个主线程处理业务，无法解决瞬时高并发带来的性能问题。</li>
-<li>方案三：多进程&#x2F;多线程，启动多个Reactor(一个MainReactor+多个SubReactor)，多个Acceptor。主 Reactor 只负责监听事件，响应事件的工作交给了从 Reactor。</li>
-</ul>
-<h2 id="模块设计"><a href="#模块设计" class="headerlink" title="模块设计"></a>模块设计</h2><ul>
-<li>Acceptor: 负责与客户端建立链接，并将连接发送给Reactor</li>
-<li>Reactor: 通过Epoll负责注册连接与监听活跃连接</li>
-<li>SubReactor: 负责管理连接,可支持分片特性，提高吞吐</li>
-<li>Thread: 负责处理数据包的接收、解包、打包、发送,可支持多线程并发处理</li>
-</ul>
-<h2 id="流程设计"><a href="#流程设计" class="headerlink" title="流程设计"></a>流程设计</h2><p>参考网图：<br><img src="https://picx.zhimg.com/80/v2-4da008d8b7f55a0c18bef0e87c5c5bb1_720w.webp?source=1940ef5c" alt="flow"></p>
-    
-    <a class="article-more-a" href="/2022/11/16/golang-tcp-reactor-acceptor/#more">more >></a>
-    
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2022/11/16/golang-tcp-reactor-acceptor/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/2/">Next &amp;raquo;</a>
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/2/">Next &amp;raquo;</a>
     </nav>
   
 

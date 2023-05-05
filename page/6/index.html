@@ -216,6 +216,202 @@
             
 
   
+    <article id="post-golang-enum" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2020/04/10/golang-enum/">Golang代码优化13-枚举</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2020/04/10/golang-enum/" class="archive-article-date">
+        <time datetime="2020-04-10T05:20:31.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-10</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>本文介绍golang中枚举的使用。</p>
+<h2 id="什么是枚举类型"><a href="#什么是枚举类型" class="headerlink" title="什么是枚举类型"></a>什么是枚举类型</h2><blockquote>
+<p>是一组命名的常数，常量值可以是连续的，也可以是断续的。</p>
+</blockquote>
+<h2 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h2><p>Golang中并没有真正的枚举类型，往往都是自己定义常量，当作枚举类型来使用。</p>
+<h2 id="简单用法"><a href="#简单用法" class="headerlink" title="简单用法"></a>简单用法</h2><p>下面以订单状态来举例说明go中枚举类型的使用方式。</p>
+<ul>
+<li>定义枚举常量<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> OrderState <span class="type">uint</span></span><br><span class="line"><span class="keyword">const</span>(</span><br><span class="line">	<span class="comment">// 待确认</span></span><br><span class="line">	OrderConfirmed OrderState = <span class="literal">iota</span> + <span class="number">1</span></span><br><span class="line">	<span class="comment">// 待支付</span></span><br><span class="line">	OrderPaying</span><br><span class="line">	<span class="comment">// 待发货</span></span><br><span class="line">	OrderShipping</span><br><span class="line">	<span class="comment">// 待收货</span></span><br><span class="line">	OrderReceiving</span><br><span class="line">	<span class="comment">// 已收货</span></span><br><span class="line">	OrderReceived</span><br><span class="line">	<span class="comment">// 已完成</span></span><br><span class="line">	OrderCompleted</span><br><span class="line">)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> state =<span class="number">6</span> <span class="comment">// 模拟从数据库中获取到的状态</span></span><br><span class="line">	<span class="keyword">if</span> OrderState(state) == OrderCompleted &#123;</span><br><span class="line">		fmt.Println(<span class="string">&quot;订单已完成&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h2><ul>
+<li><p>对于枚举常量，我们时常也需要展示类型的名称，如展示订单状态名称</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> (</span><br><span class="line">	OrderStateItems = <span class="keyword">map</span>[OrderState]<span class="type">string</span>&#123;</span><br><span class="line">		OrderConfirmed: <span class="string">&quot;待确认&quot;</span>,</span><br><span class="line">		OrderPaying:    <span class="string">&quot;待支付&quot;</span>,</span><br><span class="line">		OrderShipping:  <span class="string">&quot;待发货&quot;</span>,</span><br><span class="line">		OrderReceiving: <span class="string">&quot;待收货&quot;</span>,</span><br><span class="line">		OrderReceived:  <span class="string">&quot;已收货&quot;</span>,</span><br><span class="line">		OrderCompleted: <span class="string">&quot;已完成&quot;</span>,</span><br><span class="line">	&#125;</span><br><span class="line">)</span><br><span class="line"><span class="comment">// OrderStateEnum 枚举类</span></span><br><span class="line"><span class="keyword">type</span> OrderStateEnum <span class="keyword">struct</span> &#123;</span><br><span class="line">	<span class="comment">// v 值</span></span><br><span class="line">	v OrderState</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Name 获取订单状态名称</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e OrderStateEnum)</span></span> Name() <span class="type">string</span>  &#123;</span><br><span class="line">	<span class="keyword">return</span> OrderStateItems[e.v]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> e = OrderStateEnum&#123;OrderCompleted&#125;</span><br><span class="line">	fmt.Println(e.Name())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>检查枚举是否合法</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// IsValid 检查枚举是否合法</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e OrderStateEnum)</span></span> IsValid() <span class="type">bool</span> &#123;</span><br><span class="line">	_, ok := OrderStateItems[e.v]</span><br><span class="line">	<span class="keyword">return</span> ok</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> e = OrderStateEnum&#123;OrderCompleted&#125;</span><br><span class="line">	fmt.Println(e.IsValid())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2020/04/10/golang-enum/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-algorithm-sort" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2020/04/09/algorithm-sort/">Go数据结构与算法系列(01)-排序</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2020/04/09/algorithm-sort/" class="archive-article-date">
+        <time datetime="2020-04-09T08:15:58.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-09</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <!-- toc -->
+<p>本文介绍通过go实现常见的排序算法。</p>
+<h2 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h2><p>虽然go的内置sort包实现了相关排序算法，但是我们要了解其原理，通过自己实现一次，加深印象。</p>
+<h2 id="冒泡排序"><a href="#冒泡排序" class="headerlink" title="冒泡排序"></a>冒泡排序</h2><ul>
+<li>原理：比较两个相邻的元素，将值大的元素交换到右边。<br>时间复杂度为O(n^2)</li>
+<li>Demo<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// BubbleSort 冒泡排序</span></span><br><span class="line"><span class="comment">// 比较两个元素，将最大的元素放在右边</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">BubbleSort</span><span class="params">(a [] <span class="type">int</span>)</span></span>  &#123;</span><br><span class="line">	<span class="comment">// 从最后一个元素进行排序</span></span><br><span class="line">	<span class="keyword">for</span> first := <span class="built_in">len</span>(a) - <span class="number">1</span>;first&gt;=<span class="number">1</span>;first-- &#123;</span><br><span class="line">		<span class="comment">// 遍历剩余元素</span></span><br><span class="line">		<span class="keyword">for</span> second := first - <span class="number">1</span>;second&gt;=<span class="number">0</span>;second-- &#123;</span><br><span class="line">			<span class="comment">// 找到大的</span></span><br><span class="line">			<span class="keyword">if</span> a[first] &lt; a[second] &#123;</span><br><span class="line">				<span class="comment">// 交换</span></span><br><span class="line">				a[first], a[second] = a[second], a[first]</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>Test<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;testing&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> a = []<span class="type">int</span>&#123;<span class="number">10</span>,<span class="number">1</span>,<span class="number">35</span>,<span class="number">61</span>,<span class="number">89</span>,<span class="number">36</span>,<span class="number">55</span>&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestBubbleSort</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">	BubbleSort(a)</span><br><span class="line">	fmt.Println(a)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>输出:<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[1 10 35 36 55 61 89]</span><br></pre></td></tr></table></figure>
+    
+    <a class="article-more-a" href="/2020/04/09/algorithm-sort/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">algorithm</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2020/04/09/algorithm-sort/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-micro-service" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1016,199 +1212,9 @@
 
 
   
-    <article id="post-golang-lock" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2020/03/31/golang-lock/">Golang代码优化05-锁</a>
-	
-    </h1>
-  
-
-
-  
-  
-<a href="/2020/03/31/golang-lock/" class="archive-article-date">
-        <time datetime="2020-03-31T05:52:03.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-03-31</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>介绍在项目开发中，经常用到到保证数据安全的锁的使用。</p>
-<h2 id="sync-Mutex-互斥锁"><a href="#sync-Mutex-互斥锁" class="headerlink" title="sync.Mutex 互斥锁"></a>sync.Mutex 互斥锁</h2><ul>
-<li>demo<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Item <span class="keyword">struct</span> &#123;</span><br><span class="line">	mu sync.Mutex</span><br><span class="line">	number <span class="type">int</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// NewItem</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewItem</span><span class="params">()</span></span> *Item &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;Item&#123;</span><br><span class="line">		mu:     sync.Mutex&#123;&#125;,</span><br><span class="line">		number: <span class="number">0</span>,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// SetNumber</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(item *Item)</span></span> SetNumber(num <span class="type">int</span>) &#123;</span><br><span class="line">	item.mu.Lock()</span><br><span class="line">	<span class="keyword">defer</span> item.mu.Unlock()</span><br><span class="line">	item.number = num</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Number</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(item *Item)</span></span> Number() <span class="type">int</span> &#123;</span><br><span class="line">	item.mu.Lock()</span><br><span class="line">	<span class="keyword">defer</span> item.mu.Unlock()</span><br><span class="line">	<span class="keyword">return</span> item.number</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-通过mu互斥锁保证写入数据和读取数据都是线程安全的。如果不用锁，在多个协程里执行SetNumber()容易导致获取的数据和预期不一致</li>
-</ul>
-<h2 id="RWMutex-读写锁"><a href="#RWMutex-读写锁" class="headerlink" title="RWMutex 读写锁"></a>RWMutex 读写锁</h2><p>在读多写少的场景中，可以优先使用读写锁RWMutex。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;sync&quot;</span></span><br><span class="line">    <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line"></span><br><span class="line">    u := NewUser()</span><br><span class="line">    <span class="comment">// 通过协程并发读取，这里使用读锁，比互斥锁效率更高</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ &#123;</span><br><span class="line">        wg.Add(<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">            <span class="keyword">defer</span> wg.Done()</span><br><span class="line">            fmt.Println(<span class="string">&quot;Get Age:&quot;</span>, u.GetAge(),time.Now().Second())</span><br><span class="line">        &#125;()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 激活一个申请写锁的goroutine</span></span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        wg.Add(<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">defer</span> wg.Done()</span><br><span class="line">        u.ChangeAge(<span class="number">10</span>)</span><br><span class="line">    &#125;()</span><br><span class="line">    <span class="comment">// 阻塞，直到所有wg.Done</span></span><br><span class="line">    wg.Wait()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// NewUser return user instance</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewUser</span><span class="params">()</span></span> *U &#123;</span><br><span class="line">    <span class="keyword">return</span> &amp;U&#123;</span><br><span class="line">        rwm: sync.RWMutex&#123;&#125;,</span><br><span class="line">        Age: <span class="number">0</span>,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// U user</span></span><br><span class="line"><span class="keyword">type</span> U <span class="keyword">struct</span> &#123;</span><br><span class="line">    rwm sync.RWMutex</span><br><span class="line">    Age <span class="type">int</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// GetAge</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(u *U)</span></span> GetAge() <span class="type">int</span> &#123;</span><br><span class="line">    u.rwm.RLock()</span><br><span class="line">    <span class="keyword">defer</span> u.rwm.RUnlock()</span><br><span class="line">    <span class="keyword">return</span> u.Age</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// ChangeAge</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(u *U)</span></span> ChangeAge(age <span class="type">int</span>) &#123;</span><br><span class="line">    u.rwm.Lock()</span><br><span class="line">    <span class="keyword">defer</span> u.rwm.Unlock()</span><br><span class="line">    u.Age = age</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-    
-    <a class="article-more-a" href="/2020/03/31/golang-lock/#more">more >></a>
-    
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2020/03/31/golang-lock/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-http-response" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2020/03/31/http-response/">Golang代码优化04-Http响应处理</a>
-	
-    </h1>
-  
-
-
-  
-  
-<a href="/2020/03/31/http-response/" class="archive-article-date">
-        <time datetime="2020-03-31T04:28:14.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-03-31</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>介绍读取http的response内容。</p>
-<h2 id="读取方式"><a href="#读取方式" class="headerlink" title="读取方式"></a>读取方式</h2><ul>
-<li><p>1.使用<code>ioutil.ReadAll()</code>读取response</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span> <span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="comment">// send get request</span></span><br><span class="line">    resp, err := http.Get(<span class="string">&quot;https://api.ipify.org/?format=json&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Println(err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// defer must execute after check error,otherwise will panic when resp is nil</span></span><br><span class="line">    <span class="keyword">defer</span> resp.Body.Close()</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// read body</span></span><br><span class="line">	body, err := ioutil.ReadAll(resp.Body)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Println(err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Println(<span class="type">string</span>(body))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>但是<code>ioutil.ReadAll()</code>方法有弊端,有时候却会导致一些性能问题。比如http大量请求时轻则导致内存浪费严重，重则导致内存泄漏影响业务。</p>
-</li>
-<li><p>2.使用buffer读取</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span> <span class="params">()</span></span> &#123;</span><br><span class="line">	resp, err := http.Get(<span class="string">&quot;https://api.ipify.org/?format=json&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Println(err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">    <span class="keyword">defer</span> resp.Body.Close()</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// new buffer</span></span><br><span class="line">	buffer := bytes.NewBuffer(<span class="built_in">make</span>([]<span class="type">byte</span>, <span class="number">4056</span>))</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> _, err := io.Copy(buffer, resp.Body);err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Println(err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Println(buffer.String())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
-</ul>
-    
-    <a class="article-more-a" href="/2020/03/31/http-response/#more">more >></a>
-    
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2020/03/31/http-response/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/5/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/7/">Next &amp;raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/5/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/7/">Next &amp;raquo;</a>
     </nav>
   
 

@@ -216,6 +216,218 @@
             
 
   
+    <article id="post-algorithm-bplustree" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2022/07/09/algorithm-bplustree/">Go数据结构与算法(08)-B+Tree</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2022/07/09/algorithm-bplustree/" class="archive-article-date">
+        <time datetime="2022-07-09T01:47:36.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-07-09</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>前面介绍了BTree算法的实现，实际在数据库索引里用的是B+Tree。</p>
+<h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><blockquote>
+<p>B+树是B树的一个变种算法，两者都是平衡多路查找树。</p>
+</blockquote>
+<ul>
+<li><p>与BTree的区别</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1.非叶子节点只存储键值信息，数据记录都存放在叶子节点中。</span><br><span class="line">2.所有叶子节点之间都有一个链指针。</span><br><span class="line">3.非叶子节点的关键字的个数与其子树的个数相同。</span><br></pre></td></tr></table></figure>
+
+</li>
+<li><p>优点</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1.IO效率更高：内部结点只有关键字，没有数据，一个结点可以容纳更多的关键字。查询时一次性读入内存中的关键字也就越多</span><br><span class="line">2.查询效率稳定：因为数据全在叶子节点上，所以查询关键字的次数=树的深度，导致每一个数据的查询效率相当</span><br><span class="line">3.方便范围查询：因为叶子节点之间是有链表的方式关联，所以可以直接依次查询指定范围的数据。不必重复索引。</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><ul>
+<li><p>插入数据</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1.插入数据时首先定位到数据所在的叶子节点，然后将数据插入到该节点，插入数据后的数组依然成正序排列。</span><br><span class="line">2.若插入元素后该节点的关键字数量&lt;=阶数，则直接完成插入操作即可。</span><br><span class="line">3.若插入的关键字为该节点的最大值，则需要修改父节点的索引值。</span><br><span class="line">4.若插入元素后，该节点的关键字数量&gt;阶数，则需要想该节点分裂成两个节点，关键字的个数分别位floor((M+1)/2)和ceil((M+1)/2)</span><br><span class="line">5.若分裂几点后导致父节点的关键字数目&gt;阶数，则父节点也要进行相应的分裂操作。</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查找数据</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1.根据关键字，找到对应的叶子节点。</span><br><span class="line">2.对叶子节点进行遍历，找到关键字对应的数据。</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>删除数据</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1.当删除某节点中最大或者最小的关键字，就会涉及到更改其双亲节点一直到根节点中所有索引值的更改。</span><br><span class="line">2.删除关键字后，如果若当前节点中的关键字&gt;=阶数/2,则直接完成删除操作</span><br><span class="line">3.在删除关键字后，如果导致节点中的关键字个数&lt;阶数/2,若其兄弟节点中含有多余的关键字，可以从兄弟节点借关键字</span><br><span class="line">4.在删除关键字后，如果导致其节点中的关键字个数&lt;阶数/2,并且其兄弟节点没有多余的关键字，则需要同其兄弟节点进行合并</span><br><span class="line">5.节点合并后，需要修改父节点的关键字个数，若父节点的关键字个数&lt;阶数/2,则递归处理。</span><br></pre></td></tr></table></figure></li>
+</ul>
+    
+    <a class="article-more-a" href="/2022/07/09/algorithm-bplustree/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">algorithm</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2022/07/09/algorithm-bplustree/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-algorithm-btree" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2022/07/03/algorithm-btree/">Go数据结构与算法(07)-BTree</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2022/07/03/algorithm-btree/" class="archive-article-date">
+        <time datetime="2022-07-03T03:24:33.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-07-03</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>本文将介绍btree的原理与golang的实现。</p>
+<h2 id="什么是Btree"><a href="#什么是Btree" class="headerlink" title="什么是Btree"></a>什么是Btree</h2><p>B树是一种平衡的多路查找树。树，可广泛用于磁盘访问。 M阶树顺序的B树最多可以有m-1个键和M个子树。 使用B树的主要原因之一是它能够在单个节点中存储大量键，并且通过保持树的高度相对较小来存储大键值。</p>
+<ul>
+<li><p>概念</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">根节点：最顶层节点</span><br><span class="line">叶子节点：没有子树的节点就是叶子节点</span><br><span class="line">度数：在树中，每个节点的子节点（子树）的个数就称为该节点的度（degree）。</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>特点</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1.每个叶结点具有相同的深度，也就是树的高度。</span><br><span class="line">2.节点的元素以非降序排序，即x.k &lt;= x.k1 &lt;= ... &lt;= x.kn。且 t-1 &lt;=n &lt;= 2t-1</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h2><p>Btree主要用于提高访问数据的效率，比如数据库的索引文件。</p>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><ul>
+<li><p>插入</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> btree</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;sort&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Item是一个接口类型，含有一个Less方法，通过这个接口可以实现类似泛型的功能。</span></span><br><span class="line"><span class="keyword">type</span> Item <span class="keyword">interface</span> &#123;</span><br><span class="line">	Less(than Item) <span class="type">bool</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// IntItem 定义元素类型为int型</span></span><br><span class="line"><span class="keyword">type</span> IntItem <span class="type">int</span></span><br><span class="line"><span class="comment">// Less returns true if int(a) &lt; int(b).</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(a IntItem)</span></span> Less(b Item) <span class="type">bool</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> a &lt; b.(IntItem)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Items 元素数组</span></span><br><span class="line"><span class="keyword">type</span> Items []Item</span><br><span class="line"><span class="comment">// find 查询元素对应的位置</span></span><br><span class="line"><span class="comment">// 比如数组为 [1,3,5], 查找3时，返回1, true;查找4时，返回2, false</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(items Items)</span></span> find(t Item) (index <span class="type">int</span>, found <span class="type">bool</span>) &#123;</span><br><span class="line">	<span class="comment">// search方法使用二分搜索去返回元素中最小的满足[0,n)中最小的满足f(i)函数为true的索引i，如果f(i)为true，则f(i+1)也为true</span></span><br><span class="line">	i := sort.Search(<span class="built_in">len</span>(items), <span class="function"><span class="keyword">func</span><span class="params">(i <span class="type">int</span>)</span></span> <span class="type">bool</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> t.Less(items[i])</span><br><span class="line">	&#125;)</span><br><span class="line">	<span class="keyword">if</span> i &gt; <span class="number">0</span> &amp;&amp; !items[i<span class="number">-1</span>].Less(t) &#123;</span><br><span class="line">		<span class="comment">// 当上一个元素刚好和t相等时，返回下标和true</span></span><br><span class="line">		<span class="keyword">return</span> i - <span class="number">1</span>, <span class="literal">true</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 返回第一个大于目标元素的数组索引</span></span><br><span class="line">	<span class="keyword">return</span> i, <span class="literal">false</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// insertAt 按指定位置插入一个Item</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(items *Items)</span></span> insertAt(index <span class="type">int</span>, item Item) &#123;</span><br><span class="line">	*items = <span class="built_in">append</span>(*items, <span class="literal">nil</span>) <span class="comment">// 扩展一个位置出来</span></span><br><span class="line">	<span class="keyword">if</span> index &lt; <span class="built_in">len</span>(*items) &#123;     <span class="comment">// 可能index==len，需要插入的位置就在最后一个</span></span><br><span class="line">		<span class="built_in">copy</span>((*items)[index+<span class="number">1</span>:], (*items)[index:]) <span class="comment">// 位置后面的往后挪一下</span></span><br><span class="line">	&#125;</span><br><span class="line">	(*items)[index] = item <span class="comment">// 覆盖指定位置的数据</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// node 定义树的节点</span></span><br><span class="line"><span class="keyword">type</span> node <span class="keyword">struct</span> &#123;</span><br><span class="line">	items    Items    <span class="comment">// 元素数组</span></span><br><span class="line">	children children <span class="comment">// 子节点的指针数组</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// split 将一个节点分裂成包含左右子节点的一个父节点，使得node的items和children减半，且父节点只保留中间一个元素</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n *node)</span></span> split(mid <span class="type">int</span>) (Item, *node) &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(n.items)<span class="number">-1</span> &lt; mid &#123;</span><br><span class="line">		<span class="built_in">panic</span>(<span class="string">&quot;error index&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	upItem := n.items[mid]</span><br><span class="line">	<span class="comment">// 新增加一个节点</span></span><br><span class="line">	newNode := &amp;node&#123;&#125;</span><br><span class="line">	<span class="comment">// 将原节点的元素分一半给新节点</span></span><br><span class="line">	newNode.items = <span class="built_in">append</span>(newNode.items, n.items[mid+<span class="number">1</span>:]...)</span><br><span class="line">	<span class="comment">// 原节点只保存一半</span></span><br><span class="line">	n.items = n.items[:mid]</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 子节点也要分半</span></span><br><span class="line">	<span class="keyword">if</span> n.children != <span class="literal">nil</span> &#123;</span><br><span class="line">		newNode.children = <span class="built_in">append</span>(newNode.children, n.children[mid+<span class="number">1</span>:]...)</span><br><span class="line">		n.children = n.children[:mid+<span class="number">1</span>]</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> upItem, newNode</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// maybeSplitChild 对children进行判断</span></span><br><span class="line"><span class="comment">// 1.node的items和children元素个数分别+1,保证不破坏btree的属性</span></span><br><span class="line"><span class="comment">// 2.保证了后续插入查询地柜下沉到node的某一个子树的时候，子树items未满</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n *node)</span></span> maybeSplitChild(childIndex, maxCap <span class="type">int</span>) <span class="type">bool</span> &#123;</span><br><span class="line">	l := <span class="built_in">len</span>(n.children[childIndex].items)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 如果items已满，则进行一次分裂</span></span><br><span class="line">	<span class="keyword">if</span> l &gt;= maxCap &#123;</span><br><span class="line">		upItem, newNode := n.children[childIndex].split(l / <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 将中间的那个数据项插入到childIndex的位置</span></span><br><span class="line">		n.items.insertAt(childIndex, upItem)</span><br><span class="line">		<span class="comment">// 将新节点插入到children里，位置为childIndex+1</span></span><br><span class="line">		n.children.insertAt(childIndex+<span class="number">1</span>, newNode)</span><br><span class="line"></span><br><span class="line">		<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// insert 插入元素</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n *node)</span></span> insert(item Item, maxCap <span class="type">int</span>) Item &#123;</span><br><span class="line">	<span class="comment">// 查找元素合适的插入位置</span></span><br><span class="line">	index, found := n.items.find(item)</span><br><span class="line">	<span class="keyword">if</span> found &#123;</span><br><span class="line">		<span class="keyword">return</span> item</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 是叶子节点，直接将数据插入items</span></span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(n.children) == <span class="number">0</span> &#123;</span><br><span class="line">		n.items.insertAt(index, item)</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 不是叶子节点，看看i处的子Node是否需要分裂， 这里的操作是为了保证后面进行插入下沉到子节点时，子节点n.children[index]一定未满</span></span><br><span class="line">	<span class="keyword">if</span> n.maybeSplitChild(index, maxCap) &#123;</span><br><span class="line">		<span class="comment">// 分裂了，导致当前node的变化，需要重新定位</span></span><br><span class="line">		<span class="comment">// 保证插入查询能下沉到items符合范围的子树中</span></span><br><span class="line">		inTree := n.items[index] <span class="comment">// 获取新升级的item</span></span><br><span class="line">		<span class="keyword">switch</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> item.Less(inTree):</span><br><span class="line">			<span class="comment">// 要插入的item比分裂产生的item小，i没改变</span></span><br><span class="line">		<span class="keyword">case</span> inTree.Less(item):</span><br><span class="line">			index++ <span class="comment">// 要插入的item比分裂产生的item大，i++</span></span><br><span class="line">		<span class="keyword">default</span>:</span><br><span class="line">			<span class="comment">// 分裂升level的item和插入的item一致，替换</span></span><br><span class="line">			out := n.items[index]</span><br><span class="line">			n.items[index] = item</span><br><span class="line">			<span class="keyword">return</span> out</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 递归插入到items符合插入范围的子树</span></span><br><span class="line">	<span class="keyword">return</span> n.children[index].insert(item, maxCap)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// children 子节点</span></span><br><span class="line"><span class="keyword">type</span> children []*node</span><br><span class="line"><span class="comment">// insertAt 按指定位置插入一个Item</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *children)</span></span> insertAt(index <span class="type">int</span>, n *node) &#123;</span><br><span class="line">	*c = <span class="built_in">append</span>(*c, <span class="literal">nil</span>) <span class="comment">// 扩展一个位置出来</span></span><br><span class="line">	<span class="keyword">if</span> index &lt; <span class="built_in">len</span>(*c) &#123;     <span class="comment">// 可能index==len，需要插入的位置就在最后一个</span></span><br><span class="line">		<span class="built_in">copy</span>((*c)[index+<span class="number">1</span>:], (*c)[index:]) <span class="comment">// 位置后面的往后挪一下</span></span><br><span class="line">	&#125;</span><br><span class="line">	(*c)[index] = n <span class="comment">// 覆盖指定位置的数据</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> btree <span class="keyword">struct</span> &#123;</span><br><span class="line">	degree <span class="type">uint</span>  <span class="comment">// 树的度</span></span><br><span class="line">	root   *node <span class="comment">// 根节点</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// MinCap 返回节点元素个数的下界</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(tree *btree)</span></span> MinCap() <span class="type">int</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="type">int</span>(tree.degree - <span class="number">1</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// MaxCap 返回节点元素的上届</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(tree *btree)</span></span> MaxCap() <span class="type">int</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="type">int</span>(<span class="number">2</span>*tree.degree - <span class="number">1</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Insert 插入元素</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(tree *btree)</span></span> Insert(item Item) Item &#123;</span><br><span class="line">	<span class="comment">//如果是空树，则创建根后插入</span></span><br><span class="line">	<span class="keyword">if</span> tree.root == <span class="literal">nil</span> &#123;</span><br><span class="line">		tree.root = <span class="built_in">new</span>(node)</span><br><span class="line">		tree.root.items = <span class="built_in">append</span>(tree.root.items, item)</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 判断根节点的元素个数是否已达上限</span></span><br><span class="line">	<span class="comment">// 如果根结点已满，先对根节点进行分裂处理</span></span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(tree.root.items) &gt;= tree.MaxCap() &#123;</span><br><span class="line">		midIndex := <span class="built_in">len</span>(tree.root.items) / <span class="number">2</span></span><br><span class="line">		upItem, newNode := tree.root.split(midIndex)</span><br><span class="line">		newRoot := <span class="built_in">new</span>(node)</span><br><span class="line">		newRoot.items = <span class="built_in">append</span>(newRoot.items, upItem)</span><br><span class="line">		newRoot.children = <span class="built_in">append</span>(newRoot.children, tree.root, newNode)</span><br><span class="line">		tree.root = newRoot</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> tree.root.insert(item, tree.MaxCap())</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(degree <span class="type">uint</span>)</span></span> *btree  &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;btree&#123;degree: degree&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>删除</p>
+</li>
+<li><p>查找</p>
+</li>
+</ul>
+
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">algorithm</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2022/07/03/algorithm-btree/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-algorithm-bitmap" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1017,207 +1229,9 @@
 
 
   
-    <article id="post-golang-websocket-epoll" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2021/04/22/golang-websocket-epoll/">Golang(27)-websocket进阶</a>
-	
-    </h1>
-  
-
-
-  
-  
-<a href="/2021/04/22/golang-websocket-epoll/" class="archive-article-date">
-        <time datetime="2021-04-22T13:14:05.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-04-22</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>之前有简单的介绍过<code>websocket</code>的基本用法，本文将介绍在golang里如何处理大量websocket连接。</p>
-<h2 id="初阶"><a href="#初阶" class="headerlink" title="初阶"></a>初阶</h2><p>现在有一个即时通讯的需求，我们实现一个简单的websocket服务如下所示：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;github.com/gorilla/websocket&quot;</span></span><br><span class="line">	<span class="string">&quot;log&quot;</span></span><br><span class="line">	<span class="string">&quot;net/http&quot;</span></span><br><span class="line">)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	http.ListenAndServe(<span class="string">&quot;:8085&quot;</span>, http.HandlerFunc(<span class="function"><span class="keyword">func</span><span class="params">(w http.ResponseWriter, r *http.Request)</span></span> &#123;</span><br><span class="line">		<span class="comment">// 升级为websocket连接</span></span><br><span class="line">		conn, err := NewWebsocketConnection(w, r)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			http.NotFound(w, r)</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123; <span class="comment">// 开启一个协程去处理连接</span></span><br><span class="line">			<span class="keyword">defer</span> conn.Close() <span class="comment">// 连接结束时需要关闭</span></span><br><span class="line">			<span class="keyword">for</span> &#123;</span><br><span class="line">				_, msg, err := conn.ReadMessage() <span class="comment">// 接受消息</span></span><br><span class="line">				<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">					log.Println(<span class="string">&quot;unable to read message:&quot;</span>, err.Error())</span><br><span class="line">					<span class="keyword">return</span></span><br><span class="line">				&#125;</span><br><span class="line">				<span class="comment">// 向客户端回话,或者其他业务逻辑</span></span><br><span class="line">				reply := fmt.Sprintf(<span class="string">&quot;received:%s&quot;</span>, <span class="type">string</span>(msg))</span><br><span class="line">				<span class="keyword">if</span> err := conn.WriteMessage(websocket.TextMessage, []<span class="type">byte</span>(reply)); err != <span class="literal">nil</span> &#123;</span><br><span class="line">					log.Printf(<span class="string">&quot;unable to send message&quot;</span>)</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;()</span><br><span class="line">	&#125;))</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> u = websocket.Upgrader&#123;CheckOrigin: <span class="function"><span class="keyword">func</span><span class="params">(r *http.Request)</span></span> <span class="type">bool</span> &#123; <span class="keyword">return</span> <span class="literal">true</span> &#125;&#125; <span class="comment">// use default options</span></span><br><span class="line"><span class="comment">// WebsocketConn return web socket connection</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewWebsocketConnection</span><span class="params">(w http.ResponseWriter, r *http.Request)</span></span> (*websocket.Conn, <span class="type">error</span>) &#123;</span><br><span class="line">	<span class="keyword">return</span> u.Upgrade(w, r, <span class="literal">nil</span>)</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>通过<code>wscat -c localhost:8085</code>连接到websocket,并发送<code>hello</code>和<code>123</code>,得到测试结果如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">&gt; hello</span><br><span class="line">&lt; received:hello</span><br><span class="line">&gt; 123</span><br><span class="line">&lt; received:123</span><br></pre></td></tr></table></figure>
-
-<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><blockquote>
-<p>如果我们的服务需要面向100w个用户时，会发生什么情况？</p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1.每创建一个websocket连接，按照以上的实现方式，我们就需要创建一个goroutine来接收客户端的信息。一个goroutine大概需要2~8kb的内存</span><br><span class="line">2.如果是同时有100万个连接，假设每个goroutine占用4kb内存，那么内存消耗大概在：4kb*1000000=4G。</span><br></pre></td></tr></table></figure>
-
-<p>光是保持连接，不做任何处理就已经消耗了4G的内存，还是挺恐怖的，所以下面开始介绍用epoll模型来解决这个问题。</p>
-    
-    <a class="article-more-a" href="/2021/04/22/golang-websocket-epoll/#more">more >></a>
-    
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2021/04/22/golang-websocket-epoll/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-golang-mem" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2021/04/11/golang-mem/">Golang26-内存模型</a>
-	
-    </h1>
-  
-
-
-  
-  
-<a href="/2021/04/11/golang-mem/" class="archive-article-date">
-        <time datetime="2021-04-11T15:04:46.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-04-11</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>本文介绍Golang的内存模型相关知识。</p>
-<h2 id="什么是go的内存模型"><a href="#什么是go的内存模型" class="headerlink" title="什么是go的内存模型"></a>什么是go的内存模型</h2><blockquote>
-<p>指定了一系列条件，在这些条件下，可以保证在协程中对变量的读取操作可以观察到其他协程对同一变量写操作的结果，这就是go内存模型。</p>
-</blockquote>
-<h2 id="为什么需要这些条件？"><a href="#为什么需要这些条件？" class="headerlink" title="为什么需要这些条件？"></a>为什么需要这些条件？</h2><p>因为编译器无法保证指令执行顺序与程序书写顺序一致。   </p>
-<p>如下示例：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    i := <span class="number">5</span></span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        i = <span class="number">10</span></span><br><span class="line">    &#125;()</span><br><span class="line">    <span class="keyword">for</span> j := <span class="number">0</span>;j&lt;<span class="number">100</span>;j++ &#123;</span><br><span class="line">        fmt.Println(i)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>多运行几次，会发现结果可能不同，但可以发现，部分<code>Println</code>打印的<code>i</code>变量依然是<code>5</code>，说明未能立观察到协程对<code>i</code>变量的写操作。</p>
-<p>所以我们为了保证协程间的变量读取的可观察，就需要建立<code>Happen Before</code>关系的同步事件。也就是内存模型设定的<code>条件</code>。</p>
-<h2 id="Happen-Before"><a href="#Happen-Before" class="headerlink" title="Happen Before"></a>Happen Before</h2><p>以下几种方式，可以建立<code>Happen Before</code>关系的同步事件:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1.init函数</span><br><span class="line">2.创建/销毁goroutine</span><br><span class="line">3.channel</span><br><span class="line">4.锁</span><br><span class="line">5.Once</span><br></pre></td></tr></table></figure>
-    
-    <a class="article-more-a" href="/2021/04/11/golang-mem/#more">more >></a>
-    
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2021/04/11/golang-mem/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/2/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/4/">Next &amp;raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/2/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/4/">Next &amp;raquo;</a>
     </nav>
   
 
