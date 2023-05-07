@@ -216,6 +216,105 @@
             
 
   
+    <article id="post-golang-context" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2020/03/31/golang-context/">Goland代码优化06-上下文Context</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2020/03/31/golang-context/" class="archive-article-date">
+        <time datetime="2020-03-31T11:50:27.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-03-31</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>本文介绍关于Context的一些要点。</p>
+<h2 id="什么是Context"><a href="#什么是Context" class="headerlink" title="什么是Context"></a>什么是Context</h2><blockquote>
+<p>Context，上下文，golang协程的相关环境快照，其中包含函数调用以及涉及的相关的变量值。<br>通过Context在协程之间进行数据传递，相对于维护全局变量要简单。但也有人说它想<code>virus</code>,到处传播，褒贬不一。所以不同的场景下，还得程序猿自己决定是否适用。</p>
+</blockquote>
+<h2 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h2><p>Context是一个树形结构。首先需要创建的是根节点。</p>
+<ul>
+<li><p>顶层Context: Background</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="comment">// 声明一个空的Context，它将作为所有由此继承Context的根节点</span></span><br><span class="line">    ctx := context.Background()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>子孙节点 WithCancel&#x2F;WithDeadline&#x2F;WithTimeout&#x2F;WithValue</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">// 带cancel返回值的Context，一旦cancel被调用，即取消该创建的context</span><br><span class="line">func WithCancel(parent Context) (ctx Context, cancel CancelFunc) </span><br><span class="line"></span><br><span class="line">// 带有效期cancel返回值的Context，即必须到达指定时间点调用的cancel方法才会被执行</span><br><span class="line">func WithDeadline(parent Context, deadline time.Time) (Context, CancelFunc) </span><br><span class="line"></span><br><span class="line">// 带超时时间cancel返回值的Context，类似Deadline，前者是时间点，后者为时间间隔</span><br><span class="line">// 相当于WithDeadline(parent, time.Now().Add(timeout)).</span><br><span class="line">func WithTimeout(parent Context, timeout time.Duration) (Context, CancelFunc)</span><br><span class="line"></span><br><span class="line">// 带key-val的Context</span><br><span class="line">func WithValue(parent Context, key string, val interface) Context</span><br></pre></td></tr></table></figure></li>
+</ul>
+    
+    <a class="article-more-a" href="/2020/03/31/golang-context/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2020/03/31/golang-context/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-golang-lock" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1098,159 +1197,6 @@
     
     <p class="article-more-link">
       <a class="article-more-a" href="/2018/12/13/docker%E5%91%BD%E4%BB%A4%E8%AF%B4%E6%98%8E/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-docker" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2018/12/11/docker/">docker介绍与安装</a>
-	
-    </h1>
-  
-
-
-  
-  
-<a href="/2018/12/11/docker/" class="archive-article-date">
-        <time datetime="2018-12-11T14:02:10.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-12-11</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>本篇文章主要介绍微服务的利器：Docker的使用。<br>[TOC]</p>
-<h2 id="什么是docker"><a href="#什么是docker" class="headerlink" title="什么是docker"></a>什么是docker</h2><p>引用百度百科的说明：</p>
-<blockquote>
-<p>Docker 是一个开源的应用容器引擎，让开发者可以打包他们的应用以及依赖包到一个可移植的容器中，然后发布到任何流行的 Linux 机器上，也可以实现虚拟化。</p>
-</blockquote>
-<p>简单的说，就是将应用程序与运行环境合为一体，以docker容器的方式运行。</p>
-<p>更多内容请查看 docker官方地址: <a target="_blank" rel="noopener" href="https://www.docker.com/">https://www.docker.com</a></p>
-<h2 id="Docker的优点"><a href="#Docker的优点" class="headerlink" title="Docker的优点"></a>Docker的优点</h2><ul>
-<li><p>应用隔离性<br>使用Docker运行应用，通过使用一个容器运行一个应用，实现应用间的解耦，避免单服务器直接运行多个应用，方便管理与维护。</p>
-</li>
-<li><p>环境标准化<br>一个docker镜像不管在何处运行，其内部环境都是一致不变的，故不必担心应用移植时发生环境不对导致应用运行异常的情况。</p>
-</li>
-<li><p>部署简单化<br>一条run命令即可运行一个容器，so easy。</p>
-</li>
-</ul>
-<h2 id="安装Docker-CE"><a href="#安装Docker-CE" class="headerlink" title="安装Docker CE"></a>安装Docker CE</h2><p>以下教程以ubuntu18.04 作为运行环境进行安装，其他环境请查看 <a target="_blank" rel="noopener" href="https://docs.docker.com/install/">官方文档</a></p>
-<ul>
-<li><p>移除旧版本(非必要)</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get remove docker docker-engine docker.io</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>安装前提软件</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install \</span><br><span class="line">    apt-transport-https \</span><br><span class="line">    ca-certificates \</span><br><span class="line">    curl \</span><br><span class="line">    software-properties-common</span><br></pre></td></tr></table></figure></li>
-<li><p>添加官方GPG Key</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -</span><br><span class="line">sudo add-apt-repository \</span><br><span class="line">   &quot;deb [arch=amd64] https://download.docker.com/linux/ubuntu \</span><br><span class="line">   $(lsb_release -cs) \</span><br><span class="line">   stable&quot;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>开始安装Docker CE(社区版)</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install docker-ce</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>查看Docker 版本</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo docker version</span><br></pre></td></tr></table></figure>
-<p>输出如下:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">Client:</span><br><span class="line"> Version:           18.09.0</span><br><span class="line"> API version:       1.39</span><br><span class="line"> Go version:        go1.10.4</span><br><span class="line"> Git commit:        4d60db4</span><br><span class="line"> Built:             Wed Nov  7 00:49:01 2018</span><br><span class="line"> OS/Arch:           linux/amd64</span><br><span class="line"> Experimental:      false</span><br><span class="line"></span><br><span class="line">Server: Docker Engine - Community</span><br><span class="line"> Engine:</span><br><span class="line">  Version:          18.09.0</span><br><span class="line">  API version:      1.39 (minimum version 1.12)</span><br><span class="line">  Go version:       go1.10.4</span><br><span class="line">  Git commit:       4d60db4</span><br><span class="line">  Built:            Wed Nov  7 00:16:44 2018</span><br><span class="line">  OS/Arch:          linux/amd64</span><br><span class="line">  Experimental:     false</span><br></pre></td></tr></table></figure></li>
-</ul>
-<p>至此安装成功!</p>
-<h2 id="其他说明"><a href="#其他说明" class="headerlink" title="其他说明"></a>其他说明</h2><h3 id="免去sudo"><a href="#免去sudo" class="headerlink" title="免去sudo"></a>免去sudo</h3><p>鉴于每次docker命令都要使用超级权限，所以每次都得在前面加sudo,为此我们通过以下命令，去掉烦人的sudo.</p>
-<ul>
-<li><p>如果还没有 docker group 就添加一个</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo groupadd docker</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>将用户加入该 group 内</p>
-</li>
-</ul>
- <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo usermod -aG docker $USER</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li><p>重启Docker</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo service docker restart</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>切换当前会话到新 group</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">newgrp - docker</span><br></pre></td></tr></table></figure>
-<p>运行成功后，登出当前用户重新登录。再次输入 <code>docker verion</code>，即可。</p>
-</li>
-</ul>
-<h3 id="使用中国镜像"><a href="#使用中国镜像" class="headerlink" title="使用中国镜像"></a>使用中国镜像</h3><p>国外的镜像拉取比较慢，我们通过配置中国官方镜像，可以明显的提高镜像拉取速度。<br>这里选择修改 &#x2F;etc&#x2F;docker&#x2F;daemon.json 文件的方式。添加上 registry-mirrors 键值。</p>
-<ul>
-<li><p>打开文件</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/docker/daemon.json</span><br></pre></td></tr></table></figure></li>
-<li><p>写入以下内容</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;registry-mirrors&quot;: [&quot;https://registry.docker-cn.com&quot;]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>重启Docker</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl restart docker</span><br></pre></td></tr></table></figure></li>
-<li><p>查看是否生效<br>通过<code>docker info</code>查看是否生效，如下:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Registry Mirrors:</span><br><span class="line"> https://registry.docker-cn.com/</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>配置已生效。</p>
-</li>
-</ul>
-<p>下一篇将介绍docker的相关命令。</p>
-
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">docker</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2018/12/11/docker/">展开全文 >></a>
     </p>
     
 

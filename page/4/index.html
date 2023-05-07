@@ -216,6 +216,108 @@
             
 
   
+    <article id="post-service-etcd" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2021/04/24/service-etcd/">服务化03-Etcd的服务注册与发现</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2021/04/24/service-etcd/" class="archive-article-date">
+        <time datetime="2021-04-23T22:48:21.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-04-24</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>本文介绍如何通过etcd实现服务注册与发现。</p>
+<h2 id="Etcd"><a href="#Etcd" class="headerlink" title="Etcd"></a>Etcd</h2><blockquote>
+<p>一个高可用的分布式键值(key-value)数据库。etcd内部采用raft协议作为一致性算法，etcd基于Go语言实现。</p>
+</blockquote>
+<h2 id="一致性算法raft"><a href="#一致性算法raft" class="headerlink" title="一致性算法raft"></a>一致性算法raft</h2><p>节点的三种角色：</p>
+<ul>
+<li>Leader: 负责接收客户端的请求，将日志复制到其他节点。</li>
+<li>Candidate: 用于选举Leader的一种角色。</li>
+<li>Follower: 普通节点，负责响应Leader和Candidate节点的请求。</li>
+</ul>
+<h2 id="服务注册与发现"><a href="#服务注册与发现" class="headerlink" title="服务注册与发现"></a>服务注册与发现</h2><p><img src="http://processon.com/chart_image/6084cf02637689195242cbff.png?_=1619390448374" alt="service"></p>
+<h3 id="服务注册"><a href="#服务注册" class="headerlink" title="服务注册"></a>服务注册</h3><p>A服务启动时，将当前服务运行的<code>IP</code>和<code>Port</code>提交到Etcd保存，key为<code>ServiceA</code>。</p>
+<h3 id="服务发现"><a href="#服务发现" class="headerlink" title="服务发现"></a>服务发现</h3><p>B服务需要调用A服务的接口时，去Etcd通过<code>ServiceA</code>这个key，找到存储的服务A的地址，即可发起调用。</p>
+<h3 id="服务注销"><a href="#服务注销" class="headerlink" title="服务注销"></a>服务注销</h3><p>A服务现在要重启，就要在停止前主动注销。等待重启后再次注册即可。</p>
+<p>接下来我们来通过etcd实现：服务注册&#x2F;服务发现&#x2F;服务注销</p>
+    
+    <a class="article-more-a" href="/2021/04/24/service-etcd/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">micro-service</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2021/04/24/service-etcd/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-golang-websocket-epoll" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1124,101 +1226,6 @@
     
     <p class="article-more-link">
       <a class="article-more-a" href="/2021/02/19/golang-rbac-watcher/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-golang-limiter" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2021/02/18/golang-limiter/">Golang代码优化21-限流器(Limiter)</a>
-	
-    </h1>
-  
-
-
-  
-  
-<a href="/2021/02/18/golang-limiter/" class="archive-article-date">
-        <time datetime="2021-02-18T09:39:59.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-02-18</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>在实际的场景中，正常的请求不会造成系统异常。但我们也需要防止异常高并发场景导致整个系统崩溃的情况出现。下面介绍限流器的使用。</p>
-<h2 id="为什么需要限流器"><a href="#为什么需要限流器" class="headerlink" title="为什么需要限流器"></a>为什么需要限流器</h2><blockquote>
-<p>用户增长过快、热门业务或者爬虫等恶意攻击行为致使请求量突然增大，比如学校的教务系统，到了查分之日，请求量涨到之前的 100 倍都不止，没多久该接口几乎不可使用，并引发连锁反应导致整个系统崩溃。</p>
-</blockquote>
-<p>通过限流器，给接口设置最高访问量，保证在系统的可承受范围内，提供服务。一旦超过该阈值，不允许用户访问，保证系统的其他服务能继续正常运行。</p>
-<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> limiter</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;time&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;golang.org/x/time/rate&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// Limiter 限流器</span></span><br><span class="line"><span class="keyword">type</span> Limiter <span class="keyword">struct</span> &#123;</span><br><span class="line">	*rate.Limiter</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// New 实例化</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(maxRate <span class="type">int</span>)</span></span> *Limiter &#123;</span><br><span class="line">	instance := <span class="built_in">new</span>(Limiter)</span><br><span class="line">	instance.Limiter = rate.NewLimiter(rate.Every(time.Second), maxRate)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> instance</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="comment">// LimitMiddleware 限流器中间件</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">LimitMiddleware</span><span class="params">(maxRate <span class="type">int</span>)</span></span> gin.HandlerFunc &#123;</span><br><span class="line">	limiter := New(maxRate) <span class="comment">// 实例化一个限流器</span></span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(ctx *gin.Context)</span></span> &#123;</span><br><span class="line">		<span class="keyword">if</span> !limiter.Allow() &#123; <span class="comment">// 这里用于控制当限流器达到阈值的判断</span></span><br><span class="line">			ctx.JSON(<span class="number">403</span>, gin.H&#123;<span class="string">&quot;message&quot;</span>: <span class="string">&quot;Busy&quot;</span>&#125;)</span><br><span class="line">			ctx.Abort()</span><br><span class="line">		&#125;</span><br><span class="line">		ctx.Next()</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	r := gin.Default()</span><br><span class="line">	r.Use(LimitMiddleware(<span class="number">100</span>)) <span class="comment">// 每秒最高允许100个请求</span></span><br><span class="line">	r.GET(<span class="string">&quot;/test&quot;</span>, <span class="function"><span class="keyword">func</span><span class="params">(c *gin.Context)</span></span> &#123;</span><br><span class="line">		c.JSON(<span class="number">200</span>, gin.H&#123;</span><br><span class="line">			<span class="string">&quot;message&quot;</span>: <span class="string">&quot;pong&quot;</span>,</span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;)</span><br><span class="line">	r.Run()</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>当并发达到100以上时，后面的请求都会返回403。这样可以保证不会给系统更大的压力。</p>
-<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>请参考：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/140440501">https://zhuanlan.zhihu.com/p/140440501</a></p>
-
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2021/02/18/golang-limiter/">展开全文 >></a>
     </p>
     
 

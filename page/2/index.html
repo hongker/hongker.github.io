@@ -216,6 +216,133 @@
             
 
   
+    <article id="post-golang-im" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2022/11/28/golang-im/">Golang系列(34)- 实现百万连接的IM服务</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2022/11/28/golang-im/" class="archive-article-date">
+        <time datetime="2022-11-28T12:42:18.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-11-28</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>前面我们介绍了如何设计一个高性能tcp框架，现在我们基于该框架，利用较少的硬件资源，实现一个支持百万连接的实时聊天(IM)服务</p>
+<h2 id="即时通讯"><a href="#即时通讯" class="headerlink" title="即时通讯"></a>即时通讯</h2><blockquote>
+<p>即时通信（ IM ）是指能够即时发送和接收 互联网 消息等的业务。</p>
+</blockquote>
+<h2 id="功能设计"><a href="#功能设计" class="headerlink" title="功能设计"></a>功能设计</h2><p>本文将围绕以下三个基础功能来实现一个简易但性能强悍的IM</p>
+<ul>
+<li>私信聊天：用户A可以向用户B发送消息，系统将该消息写入用户B的信箱。</li>
+<li>群组聊天：用户A加入某个群组后发送消息，系统将该消息直接广播给其他群组成员。</li>
+<li>查询历史消息：用户可以指定某个聊天会话查询历史消息。</li>
+</ul>
+<h2 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h2><p>以下功能不做实现，但如果一个更完善的IM服务，需要具备以下特性，这里只是简单介绍下方案：</p>
+<ul>
+<li><p>如何保证消息的顺序性?</p>
+<blockquote>
+<p>消息ID采用可比较性的规则，比如Mongo的ObjectID，Snowflake算法，或者时间戳+随机字符串。客户端根据消息ID来排序显示。</p>
+</blockquote>
+</li>
+<li><p>如何保证消息的可达率？</p>
+<blockquote>
+<p>私信消息先写入信箱，然后给客户端发送新消息通知，让客户端来读取信箱，读取后删除已读消息。<br>群聊消息采用广播的方式，直接给在线的客户端推送消息，不需要做消息回执。离线用户上线后通过拉取历史数据来读取离线消息。</p>
+</blockquote>
+</li>
+<li><p>如何解决带宽占用太高？</p>
+<blockquote>
+<p>IM服务里群聊消息广播是带宽占用太高的大头，可以通过以下策略对进行省流：<br>1.设置默认不接收群聊推送，减少群聊消息的推送量<br>2.将一个时间片内的消息合并后再推送，同时设置推送的消息条数上限。丢弃多余消息条数，以提供获取历史消息的方式，按照用户触发去查询完整的消息列表。<br>3.利用压缩算法(如gzip)对消息内容进行压缩</p>
+</blockquote>
+</li>
+<li><p>如何优化超大群的消息体验？<br>对于千人&#x2F;万人&#x2F;十万人的大群，提高聊天体验，可以从延时性，每秒消息条数等方面入手。</p>
+<blockquote>
+<p>1.降低延时：可以按照分片的设计思想，将大量的连接数平均分配到多个分片里，通过多线程的方式同时对分片内的连接推送消息，比如一个十万人的大群，分成1024个分片，每个分片负责100人的推送任务。<br>2.每秒接收消息条数: 首先限制客户端的发言频率，其次是限制每秒推送的消息总条数。当每秒产生的消息超过上限时，可以采取丢弃或补全策略。<br>a)丢弃策略：通过限流算法，按照每个会话设置每秒请求数，超过上限的直接不处理。如腾讯采用的策略是每秒40条上限，超过则丢弃。<br>b)补全策略：全部接收并处理，只是推送时，推送最新N条消息而非全部，设计消息Sequence字段，第n条消息的Sequence字段值为n。客户端根据该字段进行判断是否有消息断层，如果有，通过拉取历史消息来补全，保证会话的完整性。</p>
+</blockquote>
+</li>
+</ul>
+<p>(PS：我参加的某个游戏聊天综合项目采用补全策略，必须吐槽下。需求方面，切换会话可以通过拉取历史来查看完整的消息列表，出现消息断层的情况只会出现在消息量太大且用户正聚焦在此会话，当消息量太大还补全个毛线。技术方面，客户端实力不行，设计好的补全策略的逻辑都搞不清，加上涉及本地缓存等复杂逻辑，脑子都是懵的，两个字：辣鸡)</p>
+<ul>
+<li>如何选择聊天数据的存储方案和过期策略？<blockquote>
+<p>可以根据服务的架构来确定存储方案，如下：<br>1.单点服务：可以采用内存+持久性存储(MongoDB&#x2F;ElasticSearch等)<br>2.分布式服务：可以采用分布式缓存(Redis)+持久性存储(MongoDB&#x2F;ElasticSearch等)<br>可以根据聊天类型设置过期策略，以分布式服务为例，策略如下：<br>1.私信为高级，可以采用Redis+Mongo的混合式存储，Redis设置较长的过期时间，Mongo永久存储。缓存过期后可以从Mongo中读取后再次加载到Redis中。且根据会话设置较大的消息条数上限，超过则删除更早的数据。<br>2.小群为中级，只采用Redis存储，Redis设置较长的过期时间，且根据会话设置较大的消息条数上限，超过则删除更早的数据<br>3.大群为低级，只采用Redis存储，Redis设置较短的过期时间，且根据会话设置较小的消息条数上限，超过则删除历史数据。</p>
+</blockquote>
+</li>
+</ul>
+    
+    <a class="article-more-a" href="/2022/11/28/golang-im/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2022/11/28/golang-im/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-golang-tcp-framework" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1086,98 +1213,6 @@
     
     <p class="article-more-link">
       <a class="article-more-a" href="/2022/07/14/algorithm-hashmap/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-algorithm-cache" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2022/07/14/algorithm-cache/">Go数据结构与算法(09)-基于LRU算法的缓存</a>
-	
-    </h1>
-  
-
-
-  
-  
-<a href="/2022/07/14/algorithm-cache/" class="archive-article-date">
-        <time datetime="2022-07-14T12:15:04.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-07-14</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>在项目中，使用缓存是常见的提升性能的一个方法。为防止内存被无限制的消耗，使用内存缓存必须注意到一个淘汰策略，本文就介绍其中的一种算法：LRU。</p>
-<h2 id="什么时LRU？"><a href="#什么时LRU？" class="headerlink" title="什么时LRU？"></a>什么时LRU？</h2><blockquote>
-<p>LRU (Least recently used：最近最少使用)算法在缓存写满的时候，会根据所有数据的访问记录，淘汰掉未来被访问几率最低的数据。也就是说该算法认为，最近被访问过的数据，在将来被访问的几率最大。</p>
-</blockquote>
-<p>简单的理解，就是当缓存需要淘汰时，先淘汰最早写入且最近没有被查询过的缓存元素。</p>
-    
-    <a class="article-more-a" href="/2022/07/14/algorithm-cache/#more">more >></a>
-    
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">algorithm</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2022/07/14/algorithm-cache/">展开全文 >></a>
     </p>
     
 

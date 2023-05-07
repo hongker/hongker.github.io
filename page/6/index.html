@@ -216,6 +216,109 @@
             
 
   
+    <article id="post-golang-gc" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2020/04/11/golang-gc/">Golang代码优化14-垃圾回收</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2020/04/11/golang-gc/" class="archive-article-date">
+        <time datetime="2020-04-11T02:33:47.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-11</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>垃圾回收是golang开发者需要关注的重点知识。</p>
+<h2 id="什么是垃圾回收"><a href="#什么是垃圾回收" class="headerlink" title="什么是垃圾回收"></a>什么是垃圾回收</h2><blockquote>
+<p>垃圾回收（英语：Garbage Collection，缩写为GC）是一种自动内存管理机制. 垃圾回收器(Garbage Collector)尝试回收不再被程序所需要的对象所占用的内存. </p>
+</blockquote>
+<h2 id="经典算法"><a href="#经典算法" class="headerlink" title="经典算法"></a>经典算法</h2><h3 id="引用计算"><a href="#引用计算" class="headerlink" title="引用计算"></a>引用计算</h3><p>将新引用对象的计数器加一，将不引用的对象的计数器减一。</p>
+<h3 id="标记-清除"><a href="#标记-清除" class="headerlink" title="标记-清除"></a>标记-清除</h3><p>找到不可达的对象，然后做上标记。回收标记对象。因为扫描时会冻结所有的线程，执行时程序会暂停、卡顿，即Stop The World。(Dio咋瓦鲁多)</p>
+<h2 id="Golang的GC"><a href="#Golang的GC" class="headerlink" title="Golang的GC"></a>Golang的GC</h2><p>golang基于标记-清除算法进行优化，采用三色标记法。</p>
+<ul>
+<li><p>原理<br>首先将程序创建的对象都标记为白色。<br>从root根出发扫描所有根对象，扫描所有可达的对象，标记为灰色。（root区域主要是程序运行到当前时刻的栈和全局数据区域。）<br>从灰色对象中找到其引用对象，把灰色对象本身标记为黑色。<br>监视对象中的内存修改，并重复上一步骤，知道灰色标记的对象不存在。<br>此时，GC回收白色对象。<br>最后将所有黑色标记的对象重置为白色。</p>
+</li>
+<li><p>三色标记法如何避免Stop the world的？<br>因为三色标记法结束后仅剩黑色与白色对象。如果不碰触黑色对象，只清除白色对象，则不会影响程序的执行。故清除操作可以和用户程序并发执行。</p>
+</li>
+</ul>
+<p>针对新生成的对象，go采用了<code>写屏障</code>保证该对象不会被立刻清除。简单理解就是新生成的对象，一律被标记为灰色。</p>
+<p>说实话我对原理的理解还是很生硬，仅记住三色标记法的原理。</p>
+<h2 id="如何进行GC优化"><a href="#如何进行GC优化" class="headerlink" title="如何进行GC优化"></a>如何进行GC优化</h2>
+    
+    <a class="article-more-a" href="/2020/04/11/golang-gc/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2020/04/11/golang-gc/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-golang-enum" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1084,105 +1187,6 @@
     
     <p class="article-more-link">
       <a class="article-more-a" href="/2020/04/01/golang-sync/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-golang-context" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2020/03/31/golang-context/">Goland代码优化06-上下文Context</a>
-	
-    </h1>
-  
-
-
-  
-  
-<a href="/2020/03/31/golang-context/" class="archive-article-date">
-        <time datetime="2020-03-31T11:50:27.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-03-31</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>本文介绍关于Context的一些要点。</p>
-<h2 id="什么是Context"><a href="#什么是Context" class="headerlink" title="什么是Context"></a>什么是Context</h2><blockquote>
-<p>Context，上下文，golang协程的相关环境快照，其中包含函数调用以及涉及的相关的变量值。<br>通过Context在协程之间进行数据传递，相对于维护全局变量要简单。但也有人说它想<code>virus</code>,到处传播，褒贬不一。所以不同的场景下，还得程序猿自己决定是否适用。</p>
-</blockquote>
-<h2 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h2><p>Context是一个树形结构。首先需要创建的是根节点。</p>
-<ul>
-<li><p>顶层Context: Background</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="comment">// 声明一个空的Context，它将作为所有由此继承Context的根节点</span></span><br><span class="line">    ctx := context.Background()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>子孙节点 WithCancel&#x2F;WithDeadline&#x2F;WithTimeout&#x2F;WithValue</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">// 带cancel返回值的Context，一旦cancel被调用，即取消该创建的context</span><br><span class="line">func WithCancel(parent Context) (ctx Context, cancel CancelFunc) </span><br><span class="line"></span><br><span class="line">// 带有效期cancel返回值的Context，即必须到达指定时间点调用的cancel方法才会被执行</span><br><span class="line">func WithDeadline(parent Context, deadline time.Time) (Context, CancelFunc) </span><br><span class="line"></span><br><span class="line">// 带超时时间cancel返回值的Context，类似Deadline，前者是时间点，后者为时间间隔</span><br><span class="line">// 相当于WithDeadline(parent, time.Now().Add(timeout)).</span><br><span class="line">func WithTimeout(parent Context, timeout time.Duration) (Context, CancelFunc)</span><br><span class="line"></span><br><span class="line">// 带key-val的Context</span><br><span class="line">func WithValue(parent Context, key string, val interface) Context</span><br></pre></td></tr></table></figure></li>
-</ul>
-    
-    <a class="article-more-a" href="/2020/03/31/golang-context/#more">more >></a>
-    
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2020/03/31/golang-context/">展开全文 >></a>
     </p>
     
 

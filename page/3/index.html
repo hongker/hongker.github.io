@@ -216,6 +216,98 @@
             
 
   
+    <article id="post-algorithm-cache" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2022/07/14/algorithm-cache/">Go数据结构与算法(09)-基于LRU算法的缓存</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2022/07/14/algorithm-cache/" class="archive-article-date">
+        <time datetime="2022-07-14T12:15:04.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-07-14</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>在项目中，使用缓存是常见的提升性能的一个方法。为防止内存被无限制的消耗，使用内存缓存必须注意到一个淘汰策略，本文就介绍其中的一种算法：LRU。</p>
+<h2 id="什么时LRU？"><a href="#什么时LRU？" class="headerlink" title="什么时LRU？"></a>什么时LRU？</h2><blockquote>
+<p>LRU (Least recently used：最近最少使用)算法在缓存写满的时候，会根据所有数据的访问记录，淘汰掉未来被访问几率最低的数据。也就是说该算法认为，最近被访问过的数据，在将来被访问的几率最大。</p>
+</blockquote>
+<p>简单的理解，就是当缓存需要淘汰时，先淘汰最早写入且最近没有被查询过的缓存元素。</p>
+    
+    <a class="article-more-a" href="/2022/07/14/algorithm-cache/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">algorithm</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2022/07/14/algorithm-cache/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-algorithm-bplustree" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1098,108 +1190,6 @@
     
     <p class="article-more-link">
       <a class="article-more-a" href="/2021/04/26/algorithm-trie/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-service-etcd" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2021/04/24/service-etcd/">服务化03-Etcd的服务注册与发现</a>
-	
-    </h1>
-  
-
-
-  
-  
-<a href="/2021/04/24/service-etcd/" class="archive-article-date">
-        <time datetime="2021-04-23T22:48:21.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-04-24</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>本文介绍如何通过etcd实现服务注册与发现。</p>
-<h2 id="Etcd"><a href="#Etcd" class="headerlink" title="Etcd"></a>Etcd</h2><blockquote>
-<p>一个高可用的分布式键值(key-value)数据库。etcd内部采用raft协议作为一致性算法，etcd基于Go语言实现。</p>
-</blockquote>
-<h2 id="一致性算法raft"><a href="#一致性算法raft" class="headerlink" title="一致性算法raft"></a>一致性算法raft</h2><p>节点的三种角色：</p>
-<ul>
-<li>Leader: 负责接收客户端的请求，将日志复制到其他节点。</li>
-<li>Candidate: 用于选举Leader的一种角色。</li>
-<li>Follower: 普通节点，负责响应Leader和Candidate节点的请求。</li>
-</ul>
-<h2 id="服务注册与发现"><a href="#服务注册与发现" class="headerlink" title="服务注册与发现"></a>服务注册与发现</h2><p><img src="http://processon.com/chart_image/6084cf02637689195242cbff.png?_=1619390448374" alt="service"></p>
-<h3 id="服务注册"><a href="#服务注册" class="headerlink" title="服务注册"></a>服务注册</h3><p>A服务启动时，将当前服务运行的<code>IP</code>和<code>Port</code>提交到Etcd保存，key为<code>ServiceA</code>。</p>
-<h3 id="服务发现"><a href="#服务发现" class="headerlink" title="服务发现"></a>服务发现</h3><p>B服务需要调用A服务的接口时，去Etcd通过<code>ServiceA</code>这个key，找到存储的服务A的地址，即可发起调用。</p>
-<h3 id="服务注销"><a href="#服务注销" class="headerlink" title="服务注销"></a>服务注销</h3><p>A服务现在要重启，就要在停止前主动注销。等待重启后再次注册即可。</p>
-<p>接下来我们来通过etcd实现：服务注册&#x2F;服务发现&#x2F;服务注销</p>
-    
-    <a class="article-more-a" href="/2021/04/24/service-etcd/#more">more >></a>
-    
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">micro-service</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2021/04/24/service-etcd/">展开全文 >></a>
     </p>
     
 

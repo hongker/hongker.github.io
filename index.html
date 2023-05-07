@@ -224,7 +224,7 @@
   
     <h1 itemprop="name">
 	
-	  <a class="article-title" href="/2023/05/05/algorithm-listpack/">数据结构与算法(17)- ListPack</a>
+	  <a class="article-title" href="/2023/05/05/algorithm-listpack/">数据结构与算法(18)- ListPack</a>
 	
     </h1>
   
@@ -341,16 +341,17 @@
   <div class="article-entry" itemprop="articleBody">
     
     <h2 id="什么是QuickList"><a href="#什么是QuickList" class="headerlink" title="什么是QuickList"></a>什么是QuickList</h2><blockquote>
-<p>Quicklist 是 Redis 列表（List）数据结构的一种内部优化方式。其采用链址法（Chaining）实现，可以将多个列表分成多个节点依次存储，从而减小单个列表占用空间的大小。</p>
+<p>Redis 中的 Quicklist 是一种高效存储小块二进制数据的数据结构，是由两个有序列表组成的双向链表，其中每个节点可以包含多个小块数据。Quicklist 通常用于处理缓存、队列和列表等场景，相比于单纯使用链表或数组存储小块数据，在内存占用、遍历速度和插入&#x2F;删除操作上都具有更优秀的性能。</p>
 </blockquote>
-<p>Quicklist 内部由以下两部分组成：</p>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>Quicklist 内部实现细节如下：</p>
 <ul>
-<li>ziplist 节点：使用 ziplist 来压缩小于等于 ziplist-max-entries 个元素的列表。</li>
-<li>linkedlist 节点：使用 linkedlist 特殊数据结构来存储大于 ziplist-max-entries 个元素的列表。</li>
+<li>双向链表结构：quicklist 由多个有序列表组成，列表是通过双向指针连接起来的双向链表。</li>
+<li>节点大小限制：每个 quicklist 节点最大为 4KB。</li>
+<li>压缩与不压缩：当 quicklist 中的所有小块数据（也称为 blob）平均较小且数量众多时，会启用自动压缩机制，并将多个小块数据合并为较大的块以节约空间和加快遍历速度；而当数据块较大或数量不足时，压缩机制失效，节点中的 - blob 仍然保持原样（不压缩）。</li>
+<li>按插入顺序存储：Quicklist 内的元素是按照添加时间排序的，最新的小块数据始终排在链表的最前面。</li>
+<li>ziplist 数据结构：在 Quicklist 节点中存储小块数据使用的是 ziplist 数据结构，这是一种紧凑高效的连续内存布局，可以减少内存分配和指针跳转的脆弱性。</li>
+<li>多层级索引：quicklist 中还有一个多层级索引，可以根据 blob 的下标位置快速定位到对应节点的列表，并减少遍历操作的次数。</li>
 </ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps: ziplist 是 Redis 的另一种数据结构，类似于 listpack，但它是被设计用来存储非常短的列表。相对于 ListPack，它采取更加紧凑、轻量化的存储方式。</span><br></pre></td></tr></table></figure>
-
-<p>Quicklist 的优势在于当列表大小较小时，使用 ziplist 可以有效地减小单个列表占用的空间。而在列表大小较大时，使用 linkedlist 可以避免频繁进行扩容操作，提高整体性能。需要注意的是，在写入和删除操作频繁的情况下，可能会导致整个 Quicklist 结构出现内存碎片，导致性能下降。</p>
 
     
 
@@ -378,6 +379,118 @@
     
     <p class="article-more-link">
       <a class="article-more-a" href="/2023/05/05/algorithm-quicklist/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-algorithm-ziplist" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2023/05/05/algorithm-ziplist/">数据结构与算法(16)- ZipList</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2023/05/05/algorithm-ziplist/" class="archive-article-date">
+        <time datetime="2023-05-05T01:00:12.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-05-05</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><blockquote>
+<p>Redis中的Ziplist是一种压缩列表（compact list）数据结构，用于代替双端链表、哈希表等常规数据结构。它可以在内存占用较小的情况下支持随机访问，适合存储长度小且元素数量少的列表。</p>
+</blockquote>
+<p>Ziplist将多个节点连续存储在一个紧凑的可重复利用的内存区域中，相比于双端链表、哈希表之类的数据结构，它节省了大量的内存分配和管理开销。并且，在元素个数较少的情况下，它可以更快地处理命令请求，其中包括插入、删除和遍历操作。</p>
+<pre class="mermaid">classDiagram
+    ZipList .. Entry
+    class ZipList{
+        -[]byte data
+        -int count
+        -int tailIndex
+        +Insert(entry)
+        +Get(index)
+    }
+    class Entry {
+        -int prevLen
+        -[]byte data
+        -Encoding encoding
+        +Byte()
+    }</pre>
+<h2 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h2><ul>
+<li>Ziplist的内存分布连续，高效利用了cache line，可以减少内存碎片和操作次数。</li>
+<li>可以通过偏移量快速计算每个节点的位置，并进行快速的定位和修改。这使得Ziplist的遍历与查找操作非常高效，时间复杂度为O(1)。</li>
+<li>Ziplist本身就具有压缩性，节点数量较少时，可以极大地节约内存空间。如果列表已经达到了一定大小或者需要频繁更新，则Redis会自动将其转换成基于双端链表或者散列表的数据结构。</li>
+</ul>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2>
+    
+    <a class="article-more-a" href="/2023/05/05/algorithm-ziplist/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">algorithm</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2023/05/05/algorithm-ziplist/">展开全文 >></a>
     </p>
     
 
@@ -1161,133 +1274,6 @@ class RedBlackTree:::styleClass {
     
     <p class="article-more-link">
       <a class="article-more-a" href="/2022/11/29/golang-comporess/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-golang-im" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2022/11/28/golang-im/">Golang系列(34)- 实现百万连接的IM服务</a>
-	
-    </h1>
-  
-
-
-  
-  
-<a href="/2022/11/28/golang-im/" class="archive-article-date">
-        <time datetime="2022-11-28T12:42:18.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-11-28</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>前面我们介绍了如何设计一个高性能tcp框架，现在我们基于该框架，利用较少的硬件资源，实现一个支持百万连接的实时聊天(IM)服务</p>
-<h2 id="即时通讯"><a href="#即时通讯" class="headerlink" title="即时通讯"></a>即时通讯</h2><blockquote>
-<p>即时通信（ IM ）是指能够即时发送和接收 互联网 消息等的业务。</p>
-</blockquote>
-<h2 id="功能设计"><a href="#功能设计" class="headerlink" title="功能设计"></a>功能设计</h2><p>本文将围绕以下三个基础功能来实现一个简易但性能强悍的IM</p>
-<ul>
-<li>私信聊天：用户A可以向用户B发送消息，系统将该消息写入用户B的信箱。</li>
-<li>群组聊天：用户A加入某个群组后发送消息，系统将该消息直接广播给其他群组成员。</li>
-<li>查询历史消息：用户可以指定某个聊天会话查询历史消息。</li>
-</ul>
-<h2 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h2><p>以下功能不做实现，但如果一个更完善的IM服务，需要具备以下特性，这里只是简单介绍下方案：</p>
-<ul>
-<li><p>如何保证消息的顺序性?</p>
-<blockquote>
-<p>消息ID采用可比较性的规则，比如Mongo的ObjectID，Snowflake算法，或者时间戳+随机字符串。客户端根据消息ID来排序显示。</p>
-</blockquote>
-</li>
-<li><p>如何保证消息的可达率？</p>
-<blockquote>
-<p>私信消息先写入信箱，然后给客户端发送新消息通知，让客户端来读取信箱，读取后删除已读消息。<br>群聊消息采用广播的方式，直接给在线的客户端推送消息，不需要做消息回执。离线用户上线后通过拉取历史数据来读取离线消息。</p>
-</blockquote>
-</li>
-<li><p>如何解决带宽占用太高？</p>
-<blockquote>
-<p>IM服务里群聊消息广播是带宽占用太高的大头，可以通过以下策略对进行省流：<br>1.设置默认不接收群聊推送，减少群聊消息的推送量<br>2.将一个时间片内的消息合并后再推送，同时设置推送的消息条数上限。丢弃多余消息条数，以提供获取历史消息的方式，按照用户触发去查询完整的消息列表。<br>3.利用压缩算法(如gzip)对消息内容进行压缩</p>
-</blockquote>
-</li>
-<li><p>如何优化超大群的消息体验？<br>对于千人&#x2F;万人&#x2F;十万人的大群，提高聊天体验，可以从延时性，每秒消息条数等方面入手。</p>
-<blockquote>
-<p>1.降低延时：可以按照分片的设计思想，将大量的连接数平均分配到多个分片里，通过多线程的方式同时对分片内的连接推送消息，比如一个十万人的大群，分成1024个分片，每个分片负责100人的推送任务。<br>2.每秒接收消息条数: 首先限制客户端的发言频率，其次是限制每秒推送的消息总条数。当每秒产生的消息超过上限时，可以采取丢弃或补全策略。<br>a)丢弃策略：通过限流算法，按照每个会话设置每秒请求数，超过上限的直接不处理。如腾讯采用的策略是每秒40条上限，超过则丢弃。<br>b)补全策略：全部接收并处理，只是推送时，推送最新N条消息而非全部，设计消息Sequence字段，第n条消息的Sequence字段值为n。客户端根据该字段进行判断是否有消息断层，如果有，通过拉取历史消息来补全，保证会话的完整性。</p>
-</blockquote>
-</li>
-</ul>
-<p>(PS：我参加的某个游戏聊天综合项目采用补全策略，必须吐槽下。需求方面，切换会话可以通过拉取历史来查看完整的消息列表，出现消息断层的情况只会出现在消息量太大且用户正聚焦在此会话，当消息量太大还补全个毛线。技术方面，客户端实力不行，设计好的补全策略的逻辑都搞不清，加上涉及本地缓存等复杂逻辑，脑子都是懵的，两个字：辣鸡)</p>
-<ul>
-<li>如何选择聊天数据的存储方案和过期策略？<blockquote>
-<p>可以根据服务的架构来确定存储方案，如下：<br>1.单点服务：可以采用内存+持久性存储(MongoDB&#x2F;ElasticSearch等)<br>2.分布式服务：可以采用分布式缓存(Redis)+持久性存储(MongoDB&#x2F;ElasticSearch等)<br>可以根据聊天类型设置过期策略，以分布式服务为例，策略如下：<br>1.私信为高级，可以采用Redis+Mongo的混合式存储，Redis设置较长的过期时间，Mongo永久存储。缓存过期后可以从Mongo中读取后再次加载到Redis中。且根据会话设置较大的消息条数上限，超过则删除更早的数据。<br>2.小群为中级，只采用Redis存储，Redis设置较长的过期时间，且根据会话设置较大的消息条数上限，超过则删除更早的数据<br>3.大群为低级，只采用Redis存储，Redis设置较短的过期时间，且根据会话设置较小的消息条数上限，超过则删除历史数据。</p>
-</blockquote>
-</li>
-</ul>
-    
-    <a class="article-more-a" href="/2022/11/28/golang-im/#more">more >></a>
-    
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2022/11/28/golang-im/">展开全文 >></a>
     </p>
     
 
