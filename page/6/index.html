@@ -222,6 +222,107 @@
             
 
   
+    <article id="post-golang-aop" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2020/04/12/golang-aop/">Golang代码优化15-AOP(面向切面编程)</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2020/04/12/golang-aop/" class="archive-article-date">
+        <time datetime="2020-04-12T02:45:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-12</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>因为某些原因，触发了我要深入了解下AOP。</p>
+<!-- toc -->
+<h2 id="什么是AOP"><a href="#什么是AOP" class="headerlink" title="什么是AOP"></a>什么是AOP</h2><blockquote>
+<p>AOP为Aspect Oriented Programming的缩写，意为：面向切面编程，通过预编译方式和运行期间动态代理实现程序功能的统一维护的一种技术。扩展功能不修改源代码实现。</p>
+</blockquote>
+<p>主要应用场景：日志记录，性能统计，安全控制，事务处理，异常处理等等。</p>
+<h2 id="核心概念"><a href="#核心概念" class="headerlink" title="核心概念"></a>核心概念</h2><ul>
+<li>JoinPoint:连接点。是程序执行中的一个精确执行点，例如类中的一个方法。</li>
+<li>PointCut：切入点。指定哪些组件的哪些方法使用切面组件。</li>
+<li>Advice：通知，用于指定具体作用的位置，是方法之前或之后等等，分为前置通知，后置通知，异常通知，返回通知，环绕通知。</li>
+<li>Aspect: 切面。封装通用业务逻辑的组件，即我们想要插入的代码内容。</li>
+</ul>
+<p>其内在设计模式为代理模式。</p>
+<h2 id="Go实现AOP"><a href="#Go实现AOP" class="headerlink" title="Go实现AOP"></a>Go实现AOP</h2>
+    
+    <a class="article-more-a" href="/2020/04/12/golang-aop/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2020/04/12/golang-aop/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-golang-gc" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1119,109 +1220,6 @@
 
 
   
-    <article id="post-golang-sync" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2020/04/01/golang-sync/">Golang代码优化07-sync包</a>
-	
-    </h1>
-  
-
-
-  
-  
-<a href="/2020/04/01/golang-sync/" class="archive-article-date">
-        <time datetime="2020-04-01T01:38:43.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-01</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>本文介绍golang的sync包里的知识点与使用方式。</p>
-<h2 id="什么是Sync包"><a href="#什么是Sync包" class="headerlink" title="什么是Sync包"></a>什么是Sync包</h2><blockquote>
-<p>Golang sync包提供了基础的异步操作方法，包括互斥锁Mutex，执行一次Once和并发等待组WaitGroup<br>主要的功能如下:</p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">sync.Mutex: 互斥锁</span><br><span class="line">sync.RWMutex: 读写锁</span><br><span class="line">WaitGroup: 并发等待管理</span><br><span class="line">Once：执行一次</span><br><span class="line">Cond：信号量</span><br><span class="line">Pool：临时对象池</span><br><span class="line">Map：自带锁的map</span><br></pre></td></tr></table></figure>
-
-<h2 id="sync-Mutex-amp-sync-RWMutex"><a href="#sync-Mutex-amp-sync-RWMutex" class="headerlink" title="sync.Mutex&amp;sync.RWMutex"></a>sync.Mutex&amp;sync.RWMutex</h2><ul>
-<li>sync.Mutex称为互斥锁，常用在并发编程里面。互斥锁需要保证的是同一个时间段内不能有多个并发协程同时访问某一个资源(临界区)</li>
-<li>sync.RWMutex目的是为了能够支持多个并发协程同时读取某一个资源，但只有一个并发协程能够更新资源。也就是说读和写是互斥的，写和写也是互斥的，读和读是不互斥的。<br>这两个锁的用法在之前已介绍过，故不再重复介绍。需要的请查看：<a target="_blank" rel="noopener" href="http://localhost:4000/2020/03/31/golang-lock/">Golang代码优化04-锁</a></li>
-</ul>
-<h2 id="sync-WaitGroup"><a href="#sync-WaitGroup" class="headerlink" title="sync.WaitGroup"></a>sync.WaitGroup</h2><p>sync.WaitGroup指的是等待组，在Golang并发编程里面非常常见，指的是等待一组工作完成后，再进行下一组工作。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">func (wg *WaitGroup) Add(delta int)  Add添加n个并发协程</span><br><span class="line">func (wg *WaitGroup) Done()  Done完成一个并发协程</span><br><span class="line">func (wg *WaitGroup) Wait()  Wait等待其它并发协程结束</span><br></pre></td></tr></table></figure>
-<p>简单的理解就是Boss监督Worker工作，等待所有的Worker完成后才收工！</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    n := <span class="number">100</span></span><br><span class="line">    wg := sync.WaitGroup&#123;&#125;</span><br><span class="line">    <span class="comment">// 监控n个协程</span></span><br><span class="line">    wg.Add(n) </span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; n; i++ &#123;</span><br><span class="line">        <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(i <span class="type">int</span>)</span></span> &#123;</span><br><span class="line">            fmt.Println(i)</span><br><span class="line">            <span class="comment">// 标识已完成工作</span></span><br><span class="line">            wg.Done() </span><br><span class="line">        &#125;(i)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 阻塞等待所有goroutine完成工作</span></span><br><span class="line">    wg.Wait()</span><br><span class="line">    fmt.Println(<span class="string">&quot;All done!&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="sync-Once"><a href="#sync-Once" class="headerlink" title="sync.Once"></a>sync.Once</h2>
-    
-    <a class="article-more-a" href="/2020/04/01/golang-sync/#more">more >></a>
-    
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2020/04/01/golang-sync/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/5/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/7/">Next &amp;raquo;</a>
@@ -1368,6 +1366,10 @@
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">algorithm</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">clickhouse</a>
               </li>
              
               <li class="article-tag-list-item">

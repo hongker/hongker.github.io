@@ -222,6 +222,105 @@
             
 
   
+    <article id="post-golang-rbac-watcher" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2021/02/19/golang-rbac-watcher/">Golang代码优化22-RBAC分布式同步</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2021/02/19/golang-rbac-watcher/" class="archive-article-date">
+        <time datetime="2021-02-19T13:42:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-02-19</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>前面介绍了rbac组件在单点服务上的基本应用场景,今天来介绍一下，在微服务架构下如何使用rbac来控制路由权限。</p>
+<h2 id="服务架构"><a href="#服务架构" class="headerlink" title="服务架构"></a>服务架构</h2><p><img src="http://processon.com/chart_image/6045ee8d07912947636afd81.png?_=1615196757407" alt="架构图"></p>
+<p>这是一个很普通的微服务架构，用户通过请求服务器的路由资源，发起访问，各服务需要检查用户是否拥有权限。</p>
+<p>RBAC组件是将权限规则存入内存里，当管理员通过权限管理后台更新的权限信息后，如何让各服务节点即时加载最新的权限规则呢？</p>
+<p>我们发现，管理后台产生新的权限规则，多个服务节点读取最新的权限规则，这是一个典型的生产者&#x2F;消费者模型。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/casbin/casbin">casbin</a>有提供一个<code>Watcher</code>接口。官网也提供了如<code>redis</code>、<code>etcd</code>、<code>kafka</code>等解决访问，详细文档请参考：<a target="_blank" rel="noopener" href="https://casbin.org/docs/en/watchers">https://casbin.org/docs/en/watchers</a>。下面就用redis做示例说明</p>
+<h3 id="redis"><a href="#redis" class="headerlink" title="redis"></a>redis</h3><p>基于redis的发布&#x2F;订阅(Publish&#x2F;Subscribe),管理员更新用户权限后，通过redis发布一条信息，其余服务节点，因为订阅了该信息，故每个客户端都会接受到一条通知，此刻更新内存的权限规则，即可实现分布式的权限更新。将此组件称为:<code>redis-watcher</code></p>
+<ul>
+<li><p>Demo</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;github.com/casbin/casbin/v2/persist&quot;</span></span><br><span class="line">	uuid <span class="string">&quot;github.com/satori/go.uuid&quot;</span></span><br><span class="line">	<span class="string">&quot;reflect&quot;</span></span><br><span class="line">	<span class="string">&quot;sync&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;github.com/go-redis/redis&quot;</span></span><br><span class="line">)</span><br><span class="line"><span class="comment">// Watcher</span></span><br><span class="line"><span class="keyword">type</span> Watcher <span class="keyword">struct</span> &#123;</span><br><span class="line">	options options <span class="comment">// 选项</span></span><br><span class="line">	pubConn  redis.UniversalClient <span class="comment">//生产消息</span></span><br><span class="line">	subConn  redis.UniversalClient <span class="comment">//订阅消息</span></span><br><span class="line">	callback <span class="function"><span class="keyword">func</span><span class="params">(<span class="type">string</span>)</span></span> <span class="comment">// 回调方法</span></span><br><span class="line">	closed   <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line">	once     sync.Once</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 选项</span></span><br><span class="line"><span class="keyword">type</span> options <span class="keyword">struct</span> &#123;</span><br><span class="line">	id <span class="type">string</span> <span class="comment">// 当前节点的id</span></span><br><span class="line">	channel <span class="type">string</span> <span class="comment">// redis的管道名称</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Option 选项接口</span></span><br><span class="line"><span class="keyword">type</span> Option <span class="keyword">interface</span> &#123;</span><br><span class="line">	Set(options *options)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// channel选项</span></span><br><span class="line"><span class="keyword">type</span> channelOption <span class="type">string</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(o channelOption)</span></span> Set(opts *options)  &#123;</span><br><span class="line">	opts.channel = <span class="type">string</span>(o)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithChannel</span><span class="params">(channel <span class="type">string</span>)</span></span> Option &#123;</span><br><span class="line">	<span class="keyword">return</span> channelOption(channel)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// id选项</span></span><br><span class="line"><span class="keyword">type</span> idOption <span class="type">string</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(o idOption)</span></span> Set(opts *options)  &#123;</span><br><span class="line">	opts.id = <span class="type">string</span>(o)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithID</span><span class="params">(id <span class="type">string</span>)</span></span> Option &#123;</span><br><span class="line">	<span class="keyword">return</span> idOption(id)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// NewWatcher 实例化</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewWatcher</span><span class="params">(conn redis.UniversalClient, opts ...Option)</span></span> (persist.Watcher, <span class="type">error</span>) &#123;</span><br><span class="line">	w := &amp;Watcher&#123;</span><br><span class="line">		closed: <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;),</span><br><span class="line">		pubConn: conn,</span><br><span class="line">		subConn: conn,</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	w.options = options&#123;</span><br><span class="line">		channel:  <span class="string">&quot;/casbin&quot;</span>,</span><br><span class="line">		id : uuid.NewV4().String(),</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> _, opt := <span class="keyword">range</span> opts &#123;</span><br><span class="line">		opt.Set(&amp;w.options)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">			<span class="keyword">select</span> &#123;</span><br><span class="line">			<span class="keyword">case</span> &lt;-w.closed:</span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			<span class="keyword">default</span>:</span><br><span class="line">				err := w.subscribe()</span><br><span class="line">				<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">					fmt.Printf(<span class="string">&quot;Failure from Redis subscription: %v&quot;</span>, err)</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> w, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// SetUpdateCallBack sets the update callback function invoked by the watcher</span></span><br><span class="line"><span class="comment">// when the policy is updated. Defaults to Enforcer.LoadPolicy()</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(w *Watcher)</span></span> SetUpdateCallback(callback <span class="function"><span class="keyword">func</span><span class="params">(<span class="type">string</span>)</span></span>) <span class="type">error</span> &#123;</span><br><span class="line">	w.callback = callback</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Update publishes a message to all other casbin instances telling them to</span></span><br><span class="line"><span class="comment">// invoke their update callback</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(w *Watcher)</span></span> Update() <span class="type">error</span> &#123;</span><br><span class="line">	<span class="comment">// 当有权限更新时，发送当前节点的ID,通知其他节点有更新</span></span><br><span class="line">	<span class="keyword">if</span> _, err := w.pubConn.Publish(w.options.channel, w.options.id).Result(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Close disconnects the watcher from redis</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(w *Watcher)</span></span> Close() &#123;</span><br><span class="line">	w.once.Do(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="built_in">close</span>(w.closed)</span><br><span class="line">		_ = w.subConn.Close()</span><br><span class="line">		_ = w.pubConn.Close()</span><br><span class="line">	&#125;)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// subscribe 订阅redis</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(w *Watcher)</span></span> subscribe() <span class="type">error</span> &#123;</span><br><span class="line">	psc := w.subConn.Subscribe(w.options.channel)</span><br><span class="line">	<span class="keyword">defer</span> psc.Unsubscribe()</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		receive, err := psc.Receive()</span><br><span class="line">		fmt.Println(reflect.TypeOf(receive))</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			fmt.Printf(<span class="string">&quot;try subscribe channel[%s] error[%s]\n&quot;</span>, w.options.channel, err.Error())</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">switch</span> n := receive.(<span class="keyword">type</span>) &#123;</span><br><span class="line">		<span class="keyword">case</span> <span class="type">error</span>:</span><br><span class="line">			<span class="keyword">return</span> n</span><br><span class="line">		<span class="keyword">case</span> *redis.Message:</span><br><span class="line">			<span class="comment">// 需要跳过当前生产者</span></span><br><span class="line">			<span class="keyword">if</span> n.Payload !=  w.options.id &amp;&amp; w.callback != <span class="literal">nil</span> &#123;</span><br><span class="line">				w.callback(<span class="string">&quot;success&quot;</span>) <span class="comment">// 执行回调</span></span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">case</span> *redis.Subscription:</span><br><span class="line">			<span class="keyword">if</span> n.Count == <span class="number">0</span> &#123;</span><br><span class="line">				<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>使用方式：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    authEnforcer, err := casbin.NewEnforcerSafe(<span class="string">&quot;rbac/conf/rbac_model.conf&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	redisConn := redis.NewClient(</span><br><span class="line">		&amp;redis.Options&#123;</span><br><span class="line">			Addr:     <span class="string">&quot;127.0.0.1&quot;</span>,</span><br><span class="line">			Password: <span class="string">&quot;&quot;</span>,</span><br><span class="line">			DB:       <span class="number">0</span>,</span><br><span class="line">		&#125;)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> _, err := redisConn.Ping().Result(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	watcher, err := NewWatcher(redisConn)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line">	watcher.SetUpdateCallback(<span class="function"><span class="keyword">func</span><span class="params">(s <span class="type">string</span>)</span></span> &#123;</span><br><span class="line">		<span class="comment">// 当有权限更新时，会执行这个回调，具体更新内存的权限逻辑可以自定义</span></span><br><span class="line">		enforcer.LoadPolicy()</span><br><span class="line">	&#125;)</span><br><span class="line">	authEnforcer.SetWatcher(watcher)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2021/02/19/golang-rbac-watcher/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-golang-limiter" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1135,107 +1234,6 @@
 
 
   
-    <article id="post-golang-aop" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2020/04/12/golang-aop/">Golang代码优化15-AOP(面向切面编程)</a>
-	
-    </h1>
-  
-
-
-  
-  
-<a href="/2020/04/12/golang-aop/" class="archive-article-date">
-        <time datetime="2020-04-12T02:45:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-12</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>因为某些原因，触发了我要深入了解下AOP。</p>
-<!-- toc -->
-<h2 id="什么是AOP"><a href="#什么是AOP" class="headerlink" title="什么是AOP"></a>什么是AOP</h2><blockquote>
-<p>AOP为Aspect Oriented Programming的缩写，意为：面向切面编程，通过预编译方式和运行期间动态代理实现程序功能的统一维护的一种技术。扩展功能不修改源代码实现。</p>
-</blockquote>
-<p>主要应用场景：日志记录，性能统计，安全控制，事务处理，异常处理等等。</p>
-<h2 id="核心概念"><a href="#核心概念" class="headerlink" title="核心概念"></a>核心概念</h2><ul>
-<li>JoinPoint:连接点。是程序执行中的一个精确执行点，例如类中的一个方法。</li>
-<li>PointCut：切入点。指定哪些组件的哪些方法使用切面组件。</li>
-<li>Advice：通知，用于指定具体作用的位置，是方法之前或之后等等，分为前置通知，后置通知，异常通知，返回通知，环绕通知。</li>
-<li>Aspect: 切面。封装通用业务逻辑的组件，即我们想要插入的代码内容。</li>
-</ul>
-<p>其内在设计模式为代理模式。</p>
-<h2 id="Go实现AOP"><a href="#Go实现AOP" class="headerlink" title="Go实现AOP"></a>Go实现AOP</h2>
-    
-    <a class="article-more-a" href="/2020/04/12/golang-aop/#more">more >></a>
-    
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2020/04/12/golang-aop/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/4/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/6/">Next &amp;raquo;</a>
@@ -1382,6 +1380,10 @@
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">algorithm</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">clickhouse</a>
               </li>
              
               <li class="article-tag-list-item">

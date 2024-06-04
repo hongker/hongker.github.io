@@ -222,6 +222,104 @@
             
 
   
+    <article id="post-algorithm-hashmap" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2022/07/14/algorithm-hashmap/">Go数据结构与算法(10)-hashmap</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2022/07/14/algorithm-hashmap/" class="archive-article-date">
+        <time datetime="2022-07-14T13:11:25.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-07-14</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>面试官经常问到的一个问题，hashmap是如何实现的？今天我们就来说下原理</p>
+<h2 id="什么是hashmap"><a href="#什么是hashmap" class="headerlink" title="什么是hashmap?"></a>什么是hashmap?</h2><blockquote>
+<p>map就是用于存储键值对（&lt;key,value&gt;）的集合类，也可以说是一组键值对的映射。而hashmap就是将key进行hash运算，得到目标元素在哈希表中的位置，然后再进行少量比较即可得到元素，这使得 HashMap 的查找效率极高</p>
+</blockquote>
+<h3 id="hash函数"><a href="#hash函数" class="headerlink" title="hash函数"></a>hash函数</h3><p>根据输入的关键字得到固定长度的输出，通常是返回一个较大的整形。</p>
+<h3 id="hash映射"><a href="#hash映射" class="headerlink" title="hash映射"></a>hash映射</h3><p>将通过hash运算得到的整数平均分配到指定位置，一般可以采用位运算或者模运算来实现。在性能方面，位运算的效率高于模运算。</p>
+<h3 id="寻址算法"><a href="#寻址算法" class="headerlink" title="寻址算法"></a>寻址算法</h3><p>地址是通过hash值映射得到的，那么hash映射后会出现不同的key对应到相同的地址，也就是所谓的hash冲突，为此解决冲突主要通过以下两种方法去寻址。</p>
+<ul>
+<li>链表法：每个桶对应的是一个链表，通过遍历链表，找到对应的key。</li>
+<li>开放地址法：根据初次映射的地址，遍历相邻的位置，找到对应的key。</li>
+</ul>
+    
+    <a class="article-more-a" href="/2022/07/14/algorithm-hashmap/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">algorithm</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2022/07/14/algorithm-hashmap/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-algorithm-cache" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1131,100 +1229,6 @@
 
 
   
-    <article id="post-algorithm-trie" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2021/04/26/algorithm-trie/">Go数据结构与算法(03)-字典树</a>
-	
-    </h1>
-  
-
-
-  
-  
-<a href="/2021/04/26/algorithm-trie/" class="archive-article-date">
-        <time datetime="2021-04-25T23:36:09.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-04-26</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>本文将介绍字典树的相关知识与Golang的实现方式。</p>
-<h2 id="Trie"><a href="#Trie" class="headerlink" title="Trie"></a>Trie</h2><p>在计算机科学中，trie，又称前缀树或字典树，是一种有序树，用于保存关联数组，其中的键通常是字符串。与二叉查找树不同，键不是直接保存在节点中，而是由节点在树中的位置决定。一个节点的所有子孙都有相同的前缀，也就是这个节点对应的字符串，而根节点对应空字符串。</p>
-<p>Trie的典型应用是用于统计，排序和保存大量的字符串（但不仅限于字符串），所以经常被搜索引擎系统用于文本词频统计、敏感词检测、文本提示等。它的优点是：利用字符串的公共前缀来减少查询时间，最大限度地减少无谓的字符串比较，查询效率比哈希树高。</p>
-<h2 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h2><p>如果插入数据为<code>sex</code>,<code>son</code>,<code>sleep</code>, <code>some</code>,则树结构如下所示：</p>
-<ul>
-<li>Trie:<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">s</span><br><span class="line">├── e ── x</span><br><span class="line">├── o ── n</span><br><span class="line">│   └─ m ── e</span><br><span class="line">└── l ── e ── e ── p</span><br></pre></td></tr></table></figure></li>
-</ul>
-    
-    <a class="article-more-a" href="/2021/04/26/algorithm-trie/#more">more >></a>
-    
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">algorithm</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2021/04/26/algorithm-trie/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/2/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/4/">Next &amp;raquo;</a>
@@ -1371,6 +1375,10 @@
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">algorithm</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">clickhouse</a>
               </li>
              
               <li class="article-tag-list-item">
