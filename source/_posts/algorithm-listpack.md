@@ -1,5 +1,5 @@
 ---
-title: 数据结构与算法(17)- ListPack
+title: 数据结构与算法(18)- ListPack
 date: 2023-05-05 09:42:00
 tags: algorithm
 ---
