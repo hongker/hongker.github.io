@@ -222,6 +222,107 @@
             
 
   
+    <article id="post-clickhouse-usage" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2024/06/25/clickhouse-usage/">(二)clickhouse-使用</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2024/06/25/clickhouse-usage/" class="archive-article-date">
+        <time datetime="2024-06-25T08:10:37.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2024-06-25</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>本文主要介绍 clickhouse 的基础用法</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><blockquote>
+<p>下面以 Debain&#x2F;Ubuntu系统为例，安装方式</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install -y apt-transport-https ca-certificates dirmngr</span><br><span class="line">sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 8919F6BD2B48D754</span><br><span class="line"></span><br><span class="line">echo &quot;deb https://packages.clickhouse.com/deb stable main&quot; | sudo tee \</span><br><span class="line">    /etc/apt/sources.list.d/clickhouse.list</span><br><span class="line">sudo apt-get update</span><br><span class="line"></span><br><span class="line">sudo apt-get install -y clickhouse-server clickhouse-client</span><br><span class="line"></span><br><span class="line">sudo service clickhouse-server start</span><br><span class="line">clickhouse-client # or &quot;clickhouse-client --password&quot; if you&#x27;ve set up a password.</span><br></pre></td></tr></table></figure>
+<h2 id="创建表"><a href="#创建表" class="headerlink" title="创建表"></a>创建表</h2><ul>
+<li>MergeTree类型<blockquote>
+<p>以下是一个记录用户访问日志的表</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE IF NOT EXISTS visit_log (</span><br><span class="line">    user_id UInt32, </span><br><span class="line">    url String,</span><br><span class="line">    count UInt8, </span><br><span class="line">    created_at DateTime</span><br><span class="line">) Engine = MergeTree </span><br><span class="line">PARTITION BY toYYYYMMDD(created_at) -- 按照日期分区</span><br><span class="line">ORDER BY created_at -- 按照时间排序</span><br><span class="line">TTL created_at + toIntervalDay(180) -- 指定180天自动删除过期数据</span><br><span class="line">SETTINGS index_granularity = 8192 -- 设置索引颗粒度</span><br></pre></td></tr></table></figure></li>
+<li>创建视图<blockquote>
+<p>以下视图是为了按小时统计url的访问次数</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">CREATE MATERIALIZED VIEW url_stat</span><br><span class="line">ENGINE = AggregatingMergeTree()</span><br><span class="line">ORDER BY (hour_time, url)</span><br><span class="line">TTL hour_time + toIntervalDay(1)</span><br><span class="line">AS SELECT</span><br><span class="line">    url,</span><br><span class="line">    toStartOfHour(created_at) AS hour_time, --格式化为小时</span><br><span class="line">    sumState(count) AS visit_count_state, -- 统计总和</span><br><span class="line">    minState(created_at) AS first_time_state, -- 记录最早访问时间</span><br><span class="line">    maxState(created_at) AS last_time_state -- 记录最晚访问时间</span><br><span class="line">FROM visit_log</span><br><span class="line">WHERE count&gt;0 </span><br><span class="line">GROUP BY hour_time,url</span><br></pre></td></tr></table></figure>
+    
+    <a class="article-more-a" href="/2024/06/25/clickhouse-usage/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">clickhouse</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2024/06/25/clickhouse-usage/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-clickhouse-introduce" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1174,123 +1275,6 @@ class RedBlackTree:::styleClass {
     
     <p class="article-more-link">
       <a class="article-more-a" href="/2022/12/03/golang-grpc/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-golang-worker-pool" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2022/12/01/golang-worker-pool/">Golang系列(36)-协程池设计与实现</a>
-	
-    </h1>
-  
-
-
-  
-  
-<a href="/2022/12/01/golang-worker-pool/" class="archive-article-date">
-        <time datetime="2022-12-01T14:33:43.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-12-01</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>golang里可以通过关键字<code>go</code>很简单的开启一个协程，但是如果开启协程的速度超过回收的速度，就会导致协程泄露。本文就介绍如何通过设计一个安全的协程池来避免出现协程泄露的问题。</p>
-<h2 id="协程池"><a href="#协程池" class="headerlink" title="协程池"></a>协程池</h2><blockquote>
-<p>一个包含多个工作协程，且能同时支持并行执行任务的数据结构</p>
-</blockquote>
-<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>协程池分两种类型，一种是worker数量固定的协程池，一种是worker数量可自动伸缩的协程池</p>
-<table>
-<thead>
-<tr>
-<th>类型</th>
-<th>协程数</th>
-<th>特点</th>
-<th>适用场景</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>FixedGoroutinePool</td>
-<td>固定</td>
-<td>不需要重复创建和回收协程，性能好。如果协程数分配过多，会导致资源浪费</td>
-<td>适用于并发较低的应用场景，如定时任务</td>
-</tr>
-<tr>
-<td>ScalableGoroutinePool</td>
-<td>不固定</td>
-<td>保持最低协程数量，协程数会随着并发增加而自动伸缩，在性能和资源之间有所平衡</td>
-<td>适用于并发较高的场景，如HTTP异步请求</td>
-</tr>
-</tbody></table>
-<p>接口定义：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> GoroutinePool <span class="keyword">interface</span> &#123;</span><br><span class="line">	<span class="comment">// Schedule 调度worker执行任务</span></span><br><span class="line">	Schedule(task <span class="function"><span class="keyword">func</span><span class="params">()</span></span>)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Stop 停止工作</span></span><br><span class="line">	Stop()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>以下是具体实现：</p>
-    
-    <a class="article-more-a" href="/2022/12/01/golang-worker-pool/#more">more >></a>
-    
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2022/12/01/golang-worker-pool/">展开全文 >></a>
     </p>
     
 

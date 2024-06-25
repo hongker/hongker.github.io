@@ -222,6 +222,126 @@
             
 
   
+    <article id="post-service-elasticsearch" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2021/03/21/service-elasticsearch/">服务化01-Elasticsearch集群</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2021/03/21/service-elasticsearch/" class="archive-article-date">
+        <time datetime="2021-03-21T14:02:27.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-03-21</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>本文介绍下Elasticsearch集群的相关知识。</p>
+<h2 id="什么是Elasticsearch"><a href="#什么是Elasticsearch" class="headerlink" title="什么是Elasticsearch"></a>什么是Elasticsearch</h2><blockquote>
+<p>Elasticsearch 是一个分布式、高扩展、高实时的搜索与数据分析引擎。它能很方便的使大量数据具有搜索、分析和探索的能力。充分利用Elasticsearch的水平伸缩性，能使数据在生产环境变得更有价值。</p>
+</blockquote>
+<h2 id="为什么要用集群"><a href="#为什么要用集群" class="headerlink" title="为什么要用集群"></a>为什么要用集群</h2><p>用ElasticSearch集群，将单个索引的分片到多个不同分布式物理机器上存储，从而实现高可用、容错性等。ElasticSearch会自动选举实现主备服务器。</p>
+<p>达到基本高可用，一般要至少启动3个节点，3个节点互相连接，单个节点包括所有角色，其中任意节点停机集群依然可用。</p>
+<p><img src="/94cad1c8a786c91736f0a154e533f0c93ac75784.jpeg" alt="image"></p>
+<h2 id="关键概念"><a href="#关键概念" class="headerlink" title="关键概念"></a>关键概念</h2><h3 id="节点角色"><a href="#节点角色" class="headerlink" title="节点角色"></a>节点角色</h3><ul>
+<li>Master，集群管理</li>
+<li>Voting，投票选举节点</li>
+<li>Data，数据节点</li>
+<li>Ingest，数据编辑节点</li>
+<li>Coordinate，协调节点</li>
+<li>Machine Learning，集群学习节点</li>
+</ul>
+<h3 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h3><p>一般意义上的索引是一种基于文档（数据）生成、建立的，用于快速定位指定文档的工具。而 ElasticSearch 对索引的定义有所不同，ElasticSearch 中的索引对应 MySQL 中的 Database ，也就说 ElasticSearch 中的索引更像是一种数据存储集合，即用于存储文档。</p>
+<h3 id="分片"><a href="#分片" class="headerlink" title="分片"></a>分片</h3><p>分片（Shard），是Elasticsearch中的最小存储单元。</p>
+<ul>
+<li>Shards分片：代表索引分片，ElasticSearch可以把一个完整的索引分成多个分片，这样的好处是可以把一个<br>大的索引拆分成多个，分布到不同的节点上。构成分布式搜索。分片的数量只能在索引创建前指定，并且索引<br>创建后不能更改。</li>
+<li>Replicas分片：代表副本分片，ElasticSearch可以设置多个索引的副本，副本的作用一是提高系统的容错性，<br>当某个节点某个分片损坏或丢失时可以从副本中恢复。二是提高ElasticSearch的查询效率，ElasticSearch<br>会自动对搜索请求进行负载均衡。</li>
+</ul>
+<h2 id="数据路由"><a href="#数据路由" class="headerlink" title="数据路由"></a>数据路由</h2><ul>
+<li>当客户端发起创建document的时候，ElasticSearch需要确定这个document放在该索引哪个shard上。这个过程就是数据路由。</li>
+<li>路由算法：分片位置shard&#x3D;hash(routing) % number_of_primary_shards</li>
+<li>如果number_of_primary_shards在查询的时候取余发生变化，则无法获取到该数据。即：在查询的时候，底层根据文档id%主分片数量获取分片位置</li>
+</ul>
+<p><img src="/7017386-85f5867459bca717.jpg" alt="image"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1.客户端向 ES1节点（协调节点）发送写请求，通过路由计算公式得到值为0，则当前数据应被写到主分片 S0 上。</span><br><span class="line">2.ES1 节点将请求转发到 S0 主分片所在的节点 ES3，ES3 接受请求并写入到磁盘。</span><br><span class="line">3.并发将数据复制到两个副本分片 R0 上，其中通过乐观并发控制数据的冲突。一旦所有的副本分片都报告成功，则节点 ES3 将向协调节点报告成功，协调节点向客户端报告成功。</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="脑裂现象"><a href="#脑裂现象" class="headerlink" title="脑裂现象"></a>脑裂现象</h3><p>正常情况下，集群中的所有节点，应该对主节点的选择是一致的，即一个集群中只有一个选举出来的主节点。然而，在某些情况下，比如网络通信出现问题、主节点因为负载过大停止响应等等，就会导致重新选举主节点，此时可能会出现集群中有多个主节点的现象，即节点对集群状态的认知不一致，称之为脑裂现象。</p>
+<p>为了尽量避免此种情况的出现，可以通过<code>discovery.zen.minimum_master_nodes</code>来设置最少可工作的候选主节点个数，建议设置为(候选主节点数 &#x2F; 2) + 1。保证集群中有半数以上的候选主节点。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>现在开始介绍如何通过<code>docker</code>搭建一个简单的Elasticsearch集群服务</p>
+    
+    <a class="article-more-a" href="/2021/03/21/service-elasticsearch/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">micro-service</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2021/03/21/service-elasticsearch/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-golang-rbac-watcher" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1106,105 +1226,6 @@
     
     <p class="article-more-link">
       <a class="article-more-a" href="/2020/04/17/golang-websocket/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-service-register-discover" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2020/04/12/service-register-discover/">微服务02-服务注册与发现</a>
-	
-    </h1>
-  
-
-
-  
-  
-<a href="/2020/04/12/service-register-discover/" class="archive-article-date">
-        <time datetime="2020-04-12T11:53:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-12</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>本文介绍微服务核心模块，服务注册与发现。</p>
-<h2 id="什么是服务注册"><a href="#什么是服务注册" class="headerlink" title="什么是服务注册"></a>什么是服务注册</h2><blockquote>
-<p>将服务运行的IP与端口发送到服务中心注册，注册中心将运行服务的节点信息记录。</p>
-</blockquote>
-<h2 id="什么是服务发现"><a href="#什么是服务发现" class="headerlink" title="什么是服务发现"></a>什么是服务发现</h2><blockquote>
-<p>当需要调用某个服务提供的接口时，去注册中心，获取到对应服务的节点信息，发起请求调用服务。</p>
-</blockquote>
-<h2 id="注册中心"><a href="#注册中心" class="headerlink" title="注册中心"></a>注册中心</h2><p>常用的服务注册中心有Etcd,Consul,Zookeeper等。下面分别介绍</p>
-<h2 id="目录结构"><a href="#目录结构" class="headerlink" title="目录结构"></a>目录结构</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">soa</span><br><span class="line">├─consul</span><br><span class="line">│      consul.go</span><br><span class="line">│</span><br><span class="line">├─etcd</span><br><span class="line">│      etcd.go</span><br><span class="line">│</span><br><span class="line">└─service</span><br><span class="line">        service.go</span><br></pre></td></tr></table></figure>
-
-<h3 id="Serivce"><a href="#Serivce" class="headerlink" title="Serivce"></a>Serivce</h3><p>公共的服务定义</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> service</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;math/rand&quot;</span></span><br><span class="line">	<span class="string">&quot;net&quot;</span></span><br><span class="line">	<span class="string">&quot;strconv&quot;</span></span><br><span class="line">	<span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// Node 节点</span></span><br><span class="line"><span class="keyword">type</span> Node <span class="keyword">struct</span> &#123;</span><br><span class="line">	<span class="comment">// 服务ID</span></span><br><span class="line">	ID <span class="type">string</span></span><br><span class="line">	<span class="comment">// 服务名称</span></span><br><span class="line">	Name <span class="type">string</span></span><br><span class="line">	<span class="comment">// 服务地址</span></span><br><span class="line">	Address <span class="type">string</span></span><br><span class="line">	<span class="comment">// 服务端口</span></span><br><span class="line">	Port <span class="type">int</span></span><br><span class="line">	<span class="comment">// 服务标签</span></span><br><span class="line">	Tags []<span class="type">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// GetHost 获取服务完整的地址</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(Node Node)</span></span> GetHost() <span class="type">string</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> net.JoinHostPort(Node.Address, strconv.Itoa(Node.Port))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Group</span></span><br><span class="line"><span class="keyword">type</span> Group <span class="keyword">struct</span> &#123;</span><br><span class="line">	items  []Node</span><br><span class="line">	cursor <span class="type">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Count return node count</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(group *Group)</span></span> Count() <span class="type">int</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">len</span>(group.items)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// First return fist node</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(group *Group)</span></span> First() Node &#123;</span><br><span class="line">	<span class="keyword">return</span> group.items[<span class="number">0</span>]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Rand return a rand node</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(group *Group)</span></span> Rand() Node &#123;</span><br><span class="line">	rand.Seed(time.Now().Unix()) <span class="comment">// initialize global pseudo random generator</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> group.items[rand.Intn(group.Count())]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Next return the next node</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(group *Group)</span></span> Next() Node &#123;</span><br><span class="line">	<span class="keyword">if</span> group.cursor == group.Count() &#123;</span><br><span class="line">		group.cursor = <span class="number">0</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	Node := group.items[group.cursor]</span><br><span class="line">	group.cursor++</span><br><span class="line">	<span class="keyword">return</span> Node</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Add add node</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(group *Group)</span></span> Add(node Node)  &#123;</span><br><span class="line">	group.items = <span class="built_in">append</span>(group.items, node)</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-    
-    <a class="article-more-a" href="/2020/04/12/service-register-discover/#more">more >></a>
-    
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">微服务</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2020/04/12/service-register-discover/">展开全文 >></a>
     </p>
     
 

@@ -222,6 +222,112 @@
             
 
   
+    <article id="post-golang-rpc" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2020/04/01/golang-rpc/">Golang代码优化08-RPC通信</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2020/04/01/golang-rpc/" class="archive-article-date">
+        <time datetime="2020-04-01T06:47:59.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-01</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>本文介绍go里的rpc开发的知识点与相关使用场景。</p>
+<h2 id="什么是RPC"><a href="#什么是RPC" class="headerlink" title="什么是RPC"></a>什么是RPC</h2><blockquote>
+<p>RPC（Remote Procedure Call）远程过程调用，简单的理解是一个节点请求另一个节点提供的服务。</p>
+</blockquote>
+<h2 id="RPC-vs-REST"><a href="#RPC-vs-REST" class="headerlink" title="RPC vs REST"></a>RPC vs REST</h2><ul>
+<li>RPC主要是基于TCP&#x2F;IP协议的，而REST服务主要是基于HTTP协议的</li>
+<li>REST通常以业务为导向，将业务对象上执行的操作映射到HTTP动词，格式非常简单。</li>
+<li>REST也存在一些弊端，比如只支持请求&#x2F;响应这种单一的通信方式，对象和字符串之间的序列化操作也会影响消息传递速度。在单个请求获取多个资源时存在着挑战，而且有时候很难将所有的动作都映射到HTTP动词。比如注册、授权等等。</li>
+<li>由于HTTP在应用层中完成，整个通信的代价较高，远程过程调用中直接基于TCP进行远程调用，数据传输在传输层TCP层完成，更适合对效率要求比较高的场景，RPC主要依赖于客户端和服务端之间建立Socket链接进行，底层实现比REST更复杂。</li>
+</ul>
+<h2 id="主流的RPC框架"><a href="#主流的RPC框架" class="headerlink" title="主流的RPC框架"></a>主流的RPC框架</h2><p>主要用的就是GRPC,Thrift,Dubbo这三个，下面分别介绍下使用方式。</p>
+<h3 id="GRPC"><a href="#GRPC" class="headerlink" title="GRPC"></a>GRPC</h3><p>GRPC是Google最近公布的开源软件，基于最新的HTTP2.0协议，并支持常见的众多编程语言(Golang,C++,Java,Php,Python等等)。</p>
+<ul>
+<li><p>安装<br>建议先配置go module代理。否则不开VPN下载速度可能会很慢，也许直接下载失败。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">// 安装protobuf插件</span><br><span class="line">go get -u github.com/golang/protobuf/protoc-gen-go</span><br><span class="line">// 再去下载protoc,地址:https://github.com/golang/protobuf/releases</span><br><span class="line">unzip protoc-x.x.x-linux-x86_64.zip -d /usr/local/</span><br><span class="line">// 查看版本</span><br><span class="line">protoc --version</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>示例1 校验用户<br>目录结构如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── client      # 客户端</span><br><span class="line">│   └── main.go</span><br><span class="line">├── proto</span><br><span class="line">│   └── user_auth.proto</span><br><span class="line">└── server      # 服务端</span><br><span class="line">    └── main.go</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+</ul>
+    
+    <a class="article-more-a" href="/2020/04/01/golang-rpc/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2020/04/01/golang-rpc/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-golang-sync" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1101,112 +1207,6 @@
     
     <p class="article-more-link">
       <a class="article-more-a" href="/2018/12/24/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-designMode" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2018/12/24/designMode/">设计模式</a>
-	
-    </h1>
-  
-
-
-  
-  
-<a href="/2018/12/24/designMode/" class="archive-article-date">
-        <time datetime="2018-12-24T12:31:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-12-24</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>本篇文章主要介绍设计模式的相关概念。</p>
-<h2 id="什么是设计模式"><a href="#什么是设计模式" class="headerlink" title="什么是设计模式"></a>什么是设计模式</h2><p>百度百科:</p>
-<blockquote>
-<p>设计模式（Design pattern）代表了最佳的实践，通常被有经验的面向对象的软件开发人员所采用。设计模式是软件开发人员在软件开发过程中面临的一般问题的解决方案。这些解决方案是众多软件开发人员经过相当长的一段时间的试验和错误总结出来的。</p>
-</blockquote>
-<h2 id="设计模式的作用"><a href="#设计模式的作用" class="headerlink" title="设计模式的作用"></a>设计模式的作用</h2><p>使用设计模式是为了重用代码、让代码更容易被他人理解、保证代码可靠性。 </p>
-<h2 id="设计原则"><a href="#设计原则" class="headerlink" title="设计原则"></a>设计原则</h2><ul>
-<li>单一职责原则<br>  规定一个类应该只有一个发生变化的原因。</li>
-<li>开闭原则<br>  模块应对扩展开放，而对修改关闭。</li>
-<li>里氏替换原则<br>  如果调用的是父类的话，那么换成子类也完全可以运行。</li>
-<li>依赖反转原则<br>  指在软件里面，把父类都替换成它的子类，程序的行为没有变化。</li>
-<li>接口隔离原则<br>  每一个接口应该是一种角色，不多不少，不干不该干的事，该干的事都要干。</li>
-<li>聚合服用原则<br>  在一个新的对象里面使用一些已有的对象，使之成为新对象的一部分。</li>
-</ul>
-<h2 id="设计模式"><a href="#设计模式" class="headerlink" title="设计模式"></a>设计模式</h2><p>设计模式分为三种类型，共23种。</p>
-<ul>
-<li>创建型模式：单例模式、抽象工厂模式、建造者模式、工厂模式、原型模式。</li>
-<li>结构型模式：适配器模式、桥接模式、装饰模式、组合模式、外观模式、享元模式、代理模式。</li>
-<li>行为型模式：模版方法模式、命令模式、迭代器模式、观察者模式、中介者模式、备忘录模式、解释器模式（Interpreter模式）、状态模式、策略模式、职责链模式(责任链模式)、访问者模式。</li>
-</ul>
-<p>后面的章节将细说每一种模式。代码实例统一采用PHP实现，请各位耐心的PHPer挨个看下去，代码质量取决于思想，而思想就靠设计模式来表达。</p>
-
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">设计模式</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2018/12/24/designMode/">展开全文 >></a>
     </p>
     
 

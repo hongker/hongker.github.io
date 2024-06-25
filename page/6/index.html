@@ -222,6 +222,105 @@
             
 
   
+    <article id="post-service-register-discover" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2020/04/12/service-register-discover/">微服务02-服务注册与发现</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2020/04/12/service-register-discover/" class="archive-article-date">
+        <time datetime="2020-04-12T11:53:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-12</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <p>本文介绍微服务核心模块，服务注册与发现。</p>
+<h2 id="什么是服务注册"><a href="#什么是服务注册" class="headerlink" title="什么是服务注册"></a>什么是服务注册</h2><blockquote>
+<p>将服务运行的IP与端口发送到服务中心注册，注册中心将运行服务的节点信息记录。</p>
+</blockquote>
+<h2 id="什么是服务发现"><a href="#什么是服务发现" class="headerlink" title="什么是服务发现"></a>什么是服务发现</h2><blockquote>
+<p>当需要调用某个服务提供的接口时，去注册中心，获取到对应服务的节点信息，发起请求调用服务。</p>
+</blockquote>
+<h2 id="注册中心"><a href="#注册中心" class="headerlink" title="注册中心"></a>注册中心</h2><p>常用的服务注册中心有Etcd,Consul,Zookeeper等。下面分别介绍</p>
+<h2 id="目录结构"><a href="#目录结构" class="headerlink" title="目录结构"></a>目录结构</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">soa</span><br><span class="line">├─consul</span><br><span class="line">│      consul.go</span><br><span class="line">│</span><br><span class="line">├─etcd</span><br><span class="line">│      etcd.go</span><br><span class="line">│</span><br><span class="line">└─service</span><br><span class="line">        service.go</span><br></pre></td></tr></table></figure>
+
+<h3 id="Serivce"><a href="#Serivce" class="headerlink" title="Serivce"></a>Serivce</h3><p>公共的服务定义</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> service</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;math/rand&quot;</span></span><br><span class="line">	<span class="string">&quot;net&quot;</span></span><br><span class="line">	<span class="string">&quot;strconv&quot;</span></span><br><span class="line">	<span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// Node 节点</span></span><br><span class="line"><span class="keyword">type</span> Node <span class="keyword">struct</span> &#123;</span><br><span class="line">	<span class="comment">// 服务ID</span></span><br><span class="line">	ID <span class="type">string</span></span><br><span class="line">	<span class="comment">// 服务名称</span></span><br><span class="line">	Name <span class="type">string</span></span><br><span class="line">	<span class="comment">// 服务地址</span></span><br><span class="line">	Address <span class="type">string</span></span><br><span class="line">	<span class="comment">// 服务端口</span></span><br><span class="line">	Port <span class="type">int</span></span><br><span class="line">	<span class="comment">// 服务标签</span></span><br><span class="line">	Tags []<span class="type">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// GetHost 获取服务完整的地址</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(Node Node)</span></span> GetHost() <span class="type">string</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> net.JoinHostPort(Node.Address, strconv.Itoa(Node.Port))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Group</span></span><br><span class="line"><span class="keyword">type</span> Group <span class="keyword">struct</span> &#123;</span><br><span class="line">	items  []Node</span><br><span class="line">	cursor <span class="type">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Count return node count</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(group *Group)</span></span> Count() <span class="type">int</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">len</span>(group.items)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// First return fist node</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(group *Group)</span></span> First() Node &#123;</span><br><span class="line">	<span class="keyword">return</span> group.items[<span class="number">0</span>]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Rand return a rand node</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(group *Group)</span></span> Rand() Node &#123;</span><br><span class="line">	rand.Seed(time.Now().Unix()) <span class="comment">// initialize global pseudo random generator</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> group.items[rand.Intn(group.Count())]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Next return the next node</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(group *Group)</span></span> Next() Node &#123;</span><br><span class="line">	<span class="keyword">if</span> group.cursor == group.Count() &#123;</span><br><span class="line">		group.cursor = <span class="number">0</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	Node := group.items[group.cursor]</span><br><span class="line">	group.cursor++</span><br><span class="line">	<span class="keyword">return</span> Node</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Add add node</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(group *Group)</span></span> Add(node Node)  &#123;</span><br><span class="line">	group.items = <span class="built_in">append</span>(group.items, node)</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+    
+    <a class="article-more-a" href="/2020/04/12/service-register-discover/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">微服务</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2020/04/12/service-register-discover/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-golang-aop" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1085,112 +1184,6 @@
     
     <p class="article-more-link">
       <a class="article-more-a" href="/2020/04/01/golang-log/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-golang-rpc" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2020/04/01/golang-rpc/">Golang代码优化08-RPC通信</a>
-	
-    </h1>
-  
-
-
-  
-  
-<a href="/2020/04/01/golang-rpc/" class="archive-article-date">
-        <time datetime="2020-04-01T06:47:59.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-01</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>本文介绍go里的rpc开发的知识点与相关使用场景。</p>
-<h2 id="什么是RPC"><a href="#什么是RPC" class="headerlink" title="什么是RPC"></a>什么是RPC</h2><blockquote>
-<p>RPC（Remote Procedure Call）远程过程调用，简单的理解是一个节点请求另一个节点提供的服务。</p>
-</blockquote>
-<h2 id="RPC-vs-REST"><a href="#RPC-vs-REST" class="headerlink" title="RPC vs REST"></a>RPC vs REST</h2><ul>
-<li>RPC主要是基于TCP&#x2F;IP协议的，而REST服务主要是基于HTTP协议的</li>
-<li>REST通常以业务为导向，将业务对象上执行的操作映射到HTTP动词，格式非常简单。</li>
-<li>REST也存在一些弊端，比如只支持请求&#x2F;响应这种单一的通信方式，对象和字符串之间的序列化操作也会影响消息传递速度。在单个请求获取多个资源时存在着挑战，而且有时候很难将所有的动作都映射到HTTP动词。比如注册、授权等等。</li>
-<li>由于HTTP在应用层中完成，整个通信的代价较高，远程过程调用中直接基于TCP进行远程调用，数据传输在传输层TCP层完成，更适合对效率要求比较高的场景，RPC主要依赖于客户端和服务端之间建立Socket链接进行，底层实现比REST更复杂。</li>
-</ul>
-<h2 id="主流的RPC框架"><a href="#主流的RPC框架" class="headerlink" title="主流的RPC框架"></a>主流的RPC框架</h2><p>主要用的就是GRPC,Thrift,Dubbo这三个，下面分别介绍下使用方式。</p>
-<h3 id="GRPC"><a href="#GRPC" class="headerlink" title="GRPC"></a>GRPC</h3><p>GRPC是Google最近公布的开源软件，基于最新的HTTP2.0协议，并支持常见的众多编程语言(Golang,C++,Java,Php,Python等等)。</p>
-<ul>
-<li><p>安装<br>建议先配置go module代理。否则不开VPN下载速度可能会很慢，也许直接下载失败。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">// 安装protobuf插件</span><br><span class="line">go get -u github.com/golang/protobuf/protoc-gen-go</span><br><span class="line">// 再去下载protoc,地址:https://github.com/golang/protobuf/releases</span><br><span class="line">unzip protoc-x.x.x-linux-x86_64.zip -d /usr/local/</span><br><span class="line">// 查看版本</span><br><span class="line">protoc --version</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>示例1 校验用户<br>目录结构如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── client      # 客户端</span><br><span class="line">│   └── main.go</span><br><span class="line">├── proto</span><br><span class="line">│   └── user_auth.proto</span><br><span class="line">└── server      # 服务端</span><br><span class="line">    └── main.go</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
-</ul>
-    
-    <a class="article-more-a" href="/2020/04/01/golang-rpc/#more">more >></a>
-    
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2020/04/01/golang-rpc/">展开全文 >></a>
     </p>
     
 

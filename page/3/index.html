@@ -222,6 +222,104 @@
             
 
   
+    <article id="post-algorithm-delayqueue" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+  
+  
+    <h1 itemprop="name">
+	
+	  <a class="article-title" href="/2022/07/17/algorithm-delayqueue/">Go数据结构与算法(11)-延时队列</a>
+	
+    </h1>
+  
+
+
+  
+  
+<a href="/2022/07/17/algorithm-delayqueue/" class="archive-article-date">
+        <time datetime="2022-07-17T02:00:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-07-17</time>
+</a>
+
+  
+  
+    
+
+  
+  </header>
+  
+  <div class="article-entry" itemprop="articleBody">
+    
+    <h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><blockquote>
+<p>延时队列：顾名思义，是一个用于做消息延时消费的队列。但是它也是一个普通队列，所以它具备普通队列的特性，相比之下，延时的特性就是它最大的特点。</p>
+</blockquote>
+<p>对于普通队列，如果队列里有数据，通过Pop方法可以立刻获取到队列的数据。</p>
+<p>而对于延时队列，只有当队列里有数据，且该数据的指定消费时间小于等于当前时间，此刻该数据可被获取。</p>
+<h2 id="适用场景"><a href="#适用场景" class="headerlink" title="适用场景"></a>适用场景</h2><p>延时队列适合用于设置一个定时器去触发某种事件的场景，如：</p>
+<ul>
+<li>订单在十分钟之内未支付则自动取消。</li>
+<li>优惠券过期提醒。</li>
+</ul>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>先通过堆排序实现一个优先级队列，然后以时间为优先级，实现延时队列，队列里的元素指定的时间越小，优先级越高，就先出列，也就同时达到延时的效果、</p>
+    
+    <a class="article-more-a" href="/2022/07/17/algorithm-delayqueue/#more">more >></a>
+    
+    
+
+    
+
+    
+
+  </div>
+  <div class="article-info article-info-index">
+    
+    
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">algorithm</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+    
+
+    
+    <p class="article-more-link">
+      <a class="article-more-a" href="/2022/07/17/algorithm-delayqueue/">展开全文 >></a>
+    </p>
+    
+
+    
+    <div class="clearfix"></div>
+  </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-algorithm-hashmap" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1090,116 +1188,6 @@
     
     <p class="article-more-link">
       <a class="article-more-a" href="/2021/05/09/algorithm-divide/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-service-kafka" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/2021/04/27/service-kafka/">服务化04-消息队列kafka</a>
-	
-    </h1>
-  
-
-
-  
-  
-<a href="/2021/04/27/service-kafka/" class="archive-article-date">
-        <time datetime="2021-04-26T22:50:17.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-04-27</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>本文介绍在微服务架构中，常用于服务与服务之间的异步通信组件kafka。</p>
-<h2 id="kafka"><a href="#kafka" class="headerlink" title="kafka"></a>kafka</h2><blockquote>
-<p>Kafka是由Apache软件基金会开发的一个开源流处理平台，是一种高吞吐量的分布式发布订阅消息系统。</p>
-</blockquote>
-<h2 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h2><ul>
-<li>在系统或应用程序之间构建可靠的用于传输实时数据的管道，消息队列功能</li>
-<li>构建实时的流数据处理程序来变换或处理数据流，数据处理功能</li>
-</ul>
-<p><img src="https://images2017.cnblogs.com/blog/760273/201711/760273-20171108181426763-1692750478.png" alt="image"></p>
-<h2 id="通过docker部署kafka"><a href="#通过docker部署kafka" class="headerlink" title="通过docker部署kafka"></a>通过docker部署kafka</h2><ul>
-<li><p>首先需要安装zookeeper</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --name zookeeper -p 2181:2181 -v /etc/localtime:/etc/localtime wurstmeister/zookeeper</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>然后启动kafka容器</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">docker run  -d --name kafka -p 9092:9092 \</span><br><span class="line">-e KAFKA_BROKER_ID=0 \</span><br><span class="line">-e KAFKA_ZOOKEEPER_CONNECT=172.17.0.1:2181 \</span><br><span class="line">-e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://172.17.0.1:9092 \</span><br><span class="line"> -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 \</span><br><span class="line"> -t wurstmeister/kafka</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h2 id="使用kafka-go"><a href="#使用kafka-go" class="headerlink" title="使用kafka-go"></a>使用kafka-go</h2><ul>
-<li><p>安装</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go get github.com/segmentio/kafka-go</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>封装客户端</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;context&quot;</span></span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;github.com/segmentio/kafka-go&quot;</span></span><br><span class="line">	<span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Client <span class="keyword">struct</span> &#123;</span><br><span class="line">	host <span class="type">string</span> <span class="comment">// kafka地址,一般是:localhost:9092</span></span><br><span class="line">	instance *kafka.Conn <span class="comment">// </span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Connect 连接kafka服务</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(client *Client)</span></span> Connect( topic <span class="type">string</span>) <span class="type">error</span> &#123;</span><br><span class="line">	conn, err := kafka.DialLeader(context.Background(), <span class="string">&quot;tcp&quot;</span>, client.host, topic, <span class="number">0</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> fmt.Errorf(<span class="string">&quot;failed to dial learder: %v&quot;</span>, err)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	_ = conn.SetWriteDeadline(time.Now().Add(<span class="number">10</span>*time.Second))</span><br><span class="line"></span><br><span class="line">	client.instance = conn</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// NewClient 实例化</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewClient</span><span class="params">(host <span class="type">string</span>)</span></span> *Client &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;Client&#123;host: host&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
-</ul>
-    
-    <a class="article-more-a" href="/2021/04/27/service-kafka/#more">more >></a>
-    
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">micro-service</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/2021/04/27/service-kafka/">展开全文 >></a>
     </p>
     
 
